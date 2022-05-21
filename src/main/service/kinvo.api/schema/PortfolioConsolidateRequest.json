@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioConsolidateRequest",
+    "definitions": {
+        "PortfolioConsolidateRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioId": {
+                    "type": "integer"
+                },
+                "ignoreCache": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "ignoreCache",
+                "portfolioId"
+            ],
+            "title": "PortfolioConsolidateRequest"
+        }
+    }
+}

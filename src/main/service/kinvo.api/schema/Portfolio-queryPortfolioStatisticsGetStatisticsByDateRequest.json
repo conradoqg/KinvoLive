@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioQueryPortfolioStatisticsGetStatisticsByDateRequest",
+    "definitions": {
+        "PortfolioQueryPortfolioStatisticsGetStatisticsByDateRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioId": {
+                    "type": "integer"
+                },
+                "initialDate": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "finalDate": {
+                    "type": "string",
+                    "format": "date"
+                }
+            },
+            "required": [
+                "finalDate",
+                "initialDate",
+                "portfolioId"
+            ],
+            "title": "PortfolioQueryPortfolioStatisticsGetStatisticsByDateRequest"
+        }
+    }
+}

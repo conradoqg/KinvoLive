@@ -1,0 +1,345 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponse",
+    "definitions": {
+        "PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponse": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "$ref": "#/definitions/Data"
+                },
+                "error": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "data",
+                "error",
+                "success"
+            ],
+            "title": "PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponse"
+        },
+        "Data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "reportLogoUrl": {
+                    "type": "null"
+                },
+                "bigNumbers": {
+                    "$ref": "#/definitions/BigNumbers"
+                },
+                "portfolioProfitability": {
+                    "$ref": "#/definitions/PortfolioProfitability"
+                }
+            },
+            "required": [
+                "bigNumbers",
+                "portfolioProfitability",
+                "reportLogoUrl"
+            ],
+            "title": "Data"
+        },
+        "BigNumbers": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "equity": {
+                    "type": "number"
+                },
+                "valueApplied": {
+                    "type": "number"
+                },
+                "profitability": {
+                    "type": "number"
+                },
+                "equityProfit": {
+                    "type": "number"
+                },
+                "firstApplicationDate": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": [
+                "equity",
+                "equityProfit",
+                "firstApplicationDate",
+                "profitability",
+                "valueApplied"
+            ],
+            "title": "BigNumbers"
+        },
+        "PortfolioProfitability": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "inYearProfitability": {
+                    "$ref": "#/definitions/Profitability"
+                },
+                "fromBeginningProfitability": {
+                    "$ref": "#/definitions/Profitability"
+                },
+                "in12MonthsProfitability": {
+                    "$ref": "#/definitions/Profitability"
+                },
+                "in24MonthsProfitability": {
+                    "$ref": "#/definitions/Profitability"
+                },
+                "dateRangeProfitability": {
+                    "$ref": "#/definitions/Profitability"
+                },
+                "dailyProfitability": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DailyProfitability"
+                    }
+                },
+                "monthlyProfitability": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/MonthlyProfitability"
+                    }
+                },
+                "dailyProfitabilityCumulativeByFirstSeries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/DailyProfitabilityCumulativeByFirstSery"
+                    }
+                },
+                "statisticsSummaryMonthly": {
+                    "$ref": "#/definitions/StatisticsSummaryMonthly"
+                }
+            },
+            "required": [
+                "dailyProfitability",
+                "dailyProfitabilityCumulativeByFirstSeries",
+                "dateRangeProfitability",
+                "fromBeginningProfitability",
+                "in12MonthsProfitability",
+                "in24MonthsProfitability",
+                "inYearProfitability",
+                "monthlyProfitability",
+                "statisticsSummaryMonthly"
+            ],
+            "title": "PortfolioProfitability"
+        },
+        "DailyProfitability": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "date": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "equity": {
+                    "type": "integer"
+                },
+                "valueApplied": {
+                    "type": "integer"
+                },
+                "dailyProfitability": {
+                    "type": "number"
+                },
+                "factor": {
+                    "type": "number"
+                },
+                "firstSerieProfitability": {
+                    "type": "number"
+                },
+                "secondSerieProfitability": {
+                    "type": "number"
+                },
+                "thirdSerieProfitability": {
+                    "type": "number"
+                },
+                "fourthSerieProfitability": {
+                    "type": "number"
+                },
+                "fifthSerieProfitability": {
+                    "type": "integer"
+                },
+                "firstSerieFactor": {
+                    "type": "number"
+                },
+                "secondSerieFactor": {
+                    "type": "number"
+                },
+                "thirdSerieFactor": {
+                    "type": "number"
+                },
+                "fourthSerieFactor": {
+                    "type": "number"
+                },
+                "fifthSerieFactor": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "dailyProfitability",
+                "date",
+                "equity",
+                "factor",
+                "fifthSerieFactor",
+                "fifthSerieProfitability",
+                "firstSerieFactor",
+                "firstSerieProfitability",
+                "fourthSerieFactor",
+                "fourthSerieProfitability",
+                "secondSerieFactor",
+                "secondSerieProfitability",
+                "thirdSerieFactor",
+                "thirdSerieProfitability",
+                "valueApplied"
+            ],
+            "title": "DailyProfitability"
+        },
+        "DailyProfitabilityCumulativeByFirstSery": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "profitabilityPercentageOverSerie": {
+                    "type": "integer"
+                },
+                "amountOfDays": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "amountOfDays",
+                "profitabilityPercentageOverSerie"
+            ],
+            "title": "DailyProfitabilityCumulativeByFirstSery"
+        },
+        "Profitability": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioProfitability": {
+                    "type": "number"
+                },
+                "firstSerieProfitability": {
+                    "type": "number"
+                },
+                "secondSerieProfitability": {
+                    "type": "number"
+                },
+                "thirdSerieProfitability": {
+                    "type": "number"
+                },
+                "fourthSerieProfitability": {
+                    "type": "number"
+                },
+                "fifthSerieProfitability": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "fifthSerieProfitability",
+                "firstSerieProfitability",
+                "fourthSerieProfitability",
+                "portfolioProfitability",
+                "secondSerieProfitability",
+                "thirdSerieProfitability"
+            ],
+            "title": "Profitability"
+        },
+        "MonthlyProfitability": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "year": {
+                    "type": "integer"
+                },
+                "months": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/FromBeginning"
+                    }
+                },
+                "inTheYear": {
+                    "$ref": "#/definitions/FromBeginning"
+                },
+                "fromBeginning": {
+                    "$ref": "#/definitions/FromBeginning"
+                }
+            },
+            "required": [
+                "fromBeginning",
+                "inTheYear",
+                "months",
+                "year"
+            ],
+            "title": "MonthlyProfitability"
+        },
+        "FromBeginning": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "secondSerie": {
+                    "type": "number"
+                },
+                "thirdSerie": {
+                    "type": "number"
+                },
+                "profitability": {
+                    "type": "number"
+                },
+                "indexer": {
+                    "type": "number"
+                },
+                "epochMonthlyReferenceDate": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "indexer",
+                "profitability",
+                "secondSerie",
+                "thirdSerie"
+            ],
+            "title": "FromBeginning"
+        },
+        "StatisticsSummaryMonthly": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "positiveMonths": {
+                    "type": "integer"
+                },
+                "negativeMonths": {
+                    "type": "integer"
+                },
+                "monthsAboveFirstSerie": {
+                    "type": "integer"
+                },
+                "monthsBelowFirstSerie": {
+                    "type": "integer"
+                },
+                "highestMonthlyReturn": {
+                    "type": "number"
+                },
+                "lowestMonthlyReturn": {
+                    "type": "number"
+                },
+                "averageMonthlyReturn": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "averageMonthlyReturn",
+                "highestMonthlyReturn",
+                "lowestMonthlyReturn",
+                "monthsAboveFirstSerie",
+                "monthsBelowFirstSerie",
+                "negativeMonths",
+                "positiveMonths"
+            ],
+            "title": "StatisticsSummaryMonthly"
+        }
+    }
+}

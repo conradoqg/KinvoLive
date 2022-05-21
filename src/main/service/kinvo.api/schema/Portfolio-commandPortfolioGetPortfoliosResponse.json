@@ -1,0 +1,55 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioCommandPortfolioGetPortfoliosResponse",
+    "definitions": {
+        "PortfolioCommandPortfolioGetPortfoliosResponse": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Datum"
+                    }
+                },
+                "error": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "data",
+                "error",
+                "success"
+            ],
+            "title": "PortfolioCommandPortfolioGetPortfoliosResponse"
+        },
+        "Datum": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "isPrincipal": {
+                    "type": "boolean"
+                },
+                "currencySymbol": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "currencySymbol",
+                "id",
+                "isPrincipal",
+                "title"
+            ],
+            "title": "Datum"
+        }
+    }
+}

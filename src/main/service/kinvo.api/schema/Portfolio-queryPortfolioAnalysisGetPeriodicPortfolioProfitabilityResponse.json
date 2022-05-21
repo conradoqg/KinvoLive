@@ -1,0 +1,216 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponse",
+    "definitions": {
+        "PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponse": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "$ref": "#/definitions/Data"
+                },
+                "error": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "data",
+                "error",
+                "success"
+            ],
+            "title": "PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponse"
+        },
+        "Data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "dailyProfitabilityToChart": {
+                    "$ref": "#/definitions/LyProfitabilityToChart"
+                },
+                "monthlyProfitabilityToChart": {
+                    "$ref": "#/definitions/LyProfitabilityToChart"
+                },
+                "annualProfitabilityToChart": {
+                    "$ref": "#/definitions/AnnualProfitabilityToChart"
+                },
+                "realRateOfReturn": {
+                    "$ref": "#/definitions/RealRateOfReturn"
+                },
+                "summaryByDateRange": {
+                    "$ref": "#/definitions/SummaryByDateRange"
+                }
+            },
+            "required": [
+                "annualProfitabilityToChart",
+                "dailyProfitabilityToChart",
+                "monthlyProfitabilityToChart",
+                "realRateOfReturn",
+                "summaryByDateRange"
+            ],
+            "title": "Data"
+        },
+        "AnnualProfitabilityToChart": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "series": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Series"
+                    }
+                }
+            },
+            "required": [
+                "categories",
+                "series"
+            ],
+            "title": "AnnualProfitabilityToChart"
+        },
+        "Series": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "visible": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "data",
+                "name"
+            ],
+            "title": "Series"
+        },
+        "LyProfitabilityToChart": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "categories": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "series": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Series"
+                    }
+                }
+            },
+            "required": [
+                "categories",
+                "series"
+            ],
+            "title": "LyProfitabilityToChart"
+        },
+        "RealRateOfReturn": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioRateOfReturn": {
+                    "type": "number"
+                },
+                "realRateOfReturn": {
+                    "type": "number"
+                },
+                "rateOverCDI": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "portfolioRateOfReturn",
+                "rateOverCDI",
+                "realRateOfReturn"
+            ],
+            "title": "RealRateOfReturn"
+        },
+        "SummaryByDateRange": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "lastDay": {
+                    "$ref": "#/definitions/FromBegin"
+                },
+                "inTheMonth": {
+                    "$ref": "#/definitions/FromBegin"
+                },
+                "inTheYear": {
+                    "$ref": "#/definitions/FromBegin"
+                },
+                "in12Months": {
+                    "$ref": "#/definitions/FromBegin"
+                },
+                "in24Months": {
+                    "$ref": "#/definitions/FromBegin"
+                },
+                "in36Months": {
+                    "$ref": "#/definitions/FromBegin"
+                },
+                "fromBegin": {
+                    "$ref": "#/definitions/FromBegin"
+                }
+            },
+            "required": [
+                "fromBegin",
+                "in12Months",
+                "in24Months",
+                "in36Months",
+                "inTheMonth",
+                "inTheYear",
+                "lastDay"
+            ],
+            "title": "SummaryByDateRange"
+        },
+        "FromBegin": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioProfitability": {
+                    "type": "number"
+                },
+                "firstSerieProfitability": {
+                    "type": "number"
+                },
+                "secondSerieProfitability": {
+                    "type": "number"
+                },
+                "thirdSerieProfitability": {
+                    "type": "number"
+                },
+                "fourthSerieProfitability": {
+                    "type": "number"
+                },
+                "fifthSerieProfitability": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "fifthSerieProfitability",
+                "firstSerieProfitability",
+                "fourthSerieProfitability",
+                "portfolioProfitability",
+                "secondSerieProfitability",
+                "thirdSerieProfitability"
+            ],
+            "title": "FromBegin"
+        }
+    }
+}

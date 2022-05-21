@@ -1,0 +1,58 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioQueryPortfolioConsolidationGetPortfolioResponse",
+    "definitions": {
+        "PortfolioQueryPortfolioConsolidationGetPortfolioResponse": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "$ref": "#/definitions/Data"
+                },
+                "error": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "data",
+                "error",
+                "success"
+            ],
+            "title": "PortfolioQueryPortfolioConsolidationGetPortfolioResponse"
+        },
+        "Data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "firstApplicationDate": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "lastUpdateDate": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "valueApplied": {
+                    "type": "number"
+                },
+                "equity": {
+                    "type": "number"
+                },
+                "profitability": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "equity",
+                "firstApplicationDate",
+                "lastUpdateDate",
+                "profitability",
+                "valueApplied"
+            ],
+            "title": "Data"
+        }
+    }
+}

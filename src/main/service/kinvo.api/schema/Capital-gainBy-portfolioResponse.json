@@ -1,0 +1,143 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/CapitalGainByPortfolioResponse",
+    "definitions": {
+        "CapitalGainByPortfolioResponse": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "$ref": "#/definitions/Data"
+                },
+                "error": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "data",
+                "error",
+                "success"
+            ],
+            "title": "CapitalGainByPortfolioResponse"
+        },
+        "Data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "bigNumbers": {
+                    "$ref": "#/definitions/BigNumbers"
+                },
+                "capitalGainByProductInTheMonth": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/CapitalGainByProductInTheMonth"
+                    }
+                }
+            },
+            "required": [
+                "bigNumbers",
+                "capitalGainByProductInTheMonth"
+            ],
+            "title": "Data"
+        },
+        "BigNumbers": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "previousEquity": {
+                    "type": "number"
+                },
+                "applications": {
+                    "type": "number"
+                },
+                "redemptions": {
+                    "type": "number"
+                },
+                "capitalGain": {
+                    "type": "number"
+                },
+                "percentageResult": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "applications",
+                "capitalGain",
+                "percentageResult",
+                "previousEquity",
+                "redemptions"
+            ],
+            "title": "BigNumbers"
+        },
+        "CapitalGainByProductInTheMonth": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioProductId": {
+                    "type": "integer"
+                },
+                "monthlyReferenceDate": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "initialEquity": {
+                    "type": "number"
+                },
+                "finalEquity": {
+                    "type": "number"
+                },
+                "valueApplied": {
+                    "type": "number"
+                },
+                "net": {
+                    "type": "number"
+                },
+                "applications": {
+                    "type": "number"
+                },
+                "redemptions": {
+                    "type": "number"
+                },
+                "returns": {
+                    "type": "number"
+                },
+                "proceeds": {
+                    "type": "number"
+                },
+                "capitalGain": {
+                    "type": "number"
+                },
+                "productTypeId": {
+                    "type": "integer"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "initialDate": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": [
+                "applications",
+                "capitalGain",
+                "finalEquity",
+                "initialDate",
+                "initialEquity",
+                "monthlyReferenceDate",
+                "net",
+                "portfolioProductId",
+                "proceeds",
+                "productName",
+                "productTypeId",
+                "redemptions",
+                "returns",
+                "valueApplied"
+            ],
+            "title": "CapitalGainByProductInTheMonth"
+        }
+    }
+}

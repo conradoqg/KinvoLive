@@ -1,6 +1,7 @@
 {
-  "name": "electron-react-boilerplate",
-  "description": "A foundation for scalable desktop apps",
+  "name": "kinvo-live",
+  "description": "Informações sobre o seu portifólio de bandeja",
+  "version": "1.0.0",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -14,25 +15,17 @@
     "start:preload": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.preload.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development TS_NODE_TRANSPILE_ONLY=true webpack serve --config ./.erb/configs/webpack.config.renderer.dev.ts",
     "test": "jest",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "generate:types": "sh ./scripts/generateTypes.sh"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "cross-env NODE_ENV=development eslint --cache"
-    ],
-    "*.json,.{eslintrc,prettierrc}": [
-      "prettier --ignore-path .eslintignore --parser json --write"
-    ],
-    "*.{css,scss}": [
-      "prettier --ignore-path .eslintignore --single-quote --write"
-    ],
-    "*.{html,md,yml}": [
-      "prettier --ignore-path .eslintignore --single-quote --write"
     ]
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "KinvoLive",
+    "appId": "org.erb.KinvoLive",
     "asar": true,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
@@ -90,34 +83,22 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate"
+      "owner": "conradoqg",
+      "repo": "kinvo-live"
     }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron-react-boilerplate/electron-react-boilerplate.git"
+    "url": "git+https://github.com/conradoqg/kinvo-live.git"
   },
   "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
+    "name": "Conrado Quilles Gomes",
+    "email": "conradoqg@gmail.com",
+    "url": "https://github.com/conradoqg/"
   },
-  "contributors": [
-    {
-      "name": "Amila Welihinda",
-      "email": "amilajack@gmail.com",
-      "url": "https://github.com/amilajack"
-    },
-    {
-      "name": "John Tran",
-      "email": "jptran318@gmail.com",
-      "url": "https://github.com/jooohhn"
-    }
-  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
+    "url": "https://github.com/conradoqg/kinvo-live/issues"
   },
   "keywords": [
     "electron",
@@ -130,7 +111,7 @@
     "hot",
     "reload"
   ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
+  "homepage": "https://github.com/conradoqg/kinvo-live",
   "jest": {
     "testURL": "http://localhost/",
     "testEnvironment": "jsdom",
@@ -165,11 +146,15 @@
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.0.0",
     "@types/jest": "^27.4.1",
+    "@types/memoizee": "^0.4.8",
     "@types/node": "17.0.23",
+    "@types/numeral": "^2.0.2",
     "@types/react": "^17.0.43",
     "@types/react-dom": "^17.0.14",
     "@types/react-test-renderer": "^17.0.1",
+    "@types/source-map-support": "^0.5.4",
     "@types/terser-webpack-plugin": "^5.0.4",
+    "@types/uuid": "^8.3.4",
     "@types/webpack-bundle-analyzer": "^4.4.1",
     "@types/webpack-env": "^1.16.3",
     "@typescript-eslint/eslint-plugin": "^5.18.0",
@@ -229,13 +214,31 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@mui/icons-material": "^5.6.2",
+    "@mui/lab": "^5.0.0-alpha.81",
+    "@mui/material": "^5.6.4",
+    "axios": "^0.27.2",
+    "class-transformer": "^0.5.1",
+    "dayjs": "^1.11.1",
+    "dotenv": "^16.0.0",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.6",
+    "electron-store": "^8.0.1",
     "electron-updater": "^4.6.5",
     "history": "^5.3.0",
+    "memoizee": "^0.4.15",
+    "numeral": "^2.0.6",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "react-router-dom": "^6.3.0"
+    "react-router-dom": "^6.3.0",
+    "reflect-metadata": "^0.1.13",
+    "source-map-support": "^0.5.21",
+    "ts-async-decorators": "^0.3.0",
+    "tsdi": "^0.25.0",
+    "tslog": "^3.3.3",
+    "uuid": "^8.3.2"
   },
   "devEngines": {
     "node": ">=14.x",
@@ -245,18 +248,9 @@
     "url": "https://opencollective.com/electron-react-boilerplate-594"
   },
   "browserslist": [],
-  "prettier": {
-    "overrides": [
-      {
-        "files": [
-          ".prettierrc",
-          ".eslintrc"
-        ],
-        "options": {
-          "parser": "json"
-        }
-      }
-    ],
-    "singleQuote": true
+  "electronmon": {
+    "patterns": [
+      "!data/**"
+    ]
   }
 }

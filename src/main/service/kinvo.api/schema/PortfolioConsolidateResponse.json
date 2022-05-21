@@ -1,0 +1,40 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioConsolidateResponse",
+    "definitions": {
+        "PortfolioConsolidateResponse": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "$ref": "#/definitions/Data"
+                },
+                "error": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "data",
+                "error",
+                "success"
+            ],
+            "title": "PortfolioConsolidateResponse"
+        },
+        "Data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "consolidationRoute": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "consolidationRoute"
+            ],
+            "title": "Data"
+        }
+    }
+}

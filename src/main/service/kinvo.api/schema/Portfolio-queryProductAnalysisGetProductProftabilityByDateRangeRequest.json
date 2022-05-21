@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest",
+    "definitions": {
+        "PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioId": {
+                    "type": "integer"
+                },
+                "initialDate": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "finalDate": {
+                    "type": "string",
+                    "format": "date"
+                }
+            },
+            "required": [
+                "finalDate",
+                "initialDate",
+                "portfolioId"
+            ],
+            "title": "PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest"
+        }
+    }
+}

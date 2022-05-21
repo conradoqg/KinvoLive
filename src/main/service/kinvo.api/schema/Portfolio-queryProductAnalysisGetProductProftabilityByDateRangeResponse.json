@@ -1,0 +1,120 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponse",
+    "definitions": {
+        "PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponse": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Datum"
+                    }
+                },
+                "error": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "data",
+                "error",
+                "success"
+            ],
+            "title": "PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponse"
+        },
+        "Datum": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioProductId": {
+                    "type": "integer"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "productTypeId": {
+                    "type": "integer"
+                },
+                "equity": {
+                    "type": "number"
+                },
+                "financialInstitutionId": {
+                    "type": "integer"
+                },
+                "financialInstitutionName": {
+                    "type": "string"
+                },
+                "strategyOfDiversificationId": {
+                    "type": "integer"
+                },
+                "strategyOfDiversificationDescription": {
+                    "type": "string"
+                },
+                "inTheMonth": {
+                    "$ref": "#/definitions/FromBeginning"
+                },
+                "inTheYear": {
+                    "$ref": "#/definitions/FromBeginning"
+                },
+                "inThePeriod": {
+                    "$ref": "#/definitions/FromBeginning"
+                },
+                "inThreeMonths": {
+                    "$ref": "#/definitions/FromBeginning"
+                },
+                "inSixMonths": {
+                    "$ref": "#/definitions/FromBeginning"
+                },
+                "inTwelveMonths": {
+                    "$ref": "#/definitions/FromBeginning"
+                },
+                "inTwentyfourMonths": {
+                    "$ref": "#/definitions/FromBeginning"
+                },
+                "fromBeginning": {
+                    "$ref": "#/definitions/FromBeginning"
+                }
+            },
+            "required": [
+                "equity",
+                "financialInstitutionId",
+                "financialInstitutionName",
+                "fromBeginning",
+                "inSixMonths",
+                "inTheMonth",
+                "inThePeriod",
+                "inTheYear",
+                "inThreeMonths",
+                "inTwelveMonths",
+                "inTwentyfourMonths",
+                "portfolioProductId",
+                "productName",
+                "productTypeId",
+                "strategyOfDiversificationDescription",
+                "strategyOfDiversificationId"
+            ],
+            "title": "Datum"
+        },
+        "FromBeginning": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioProfitability": {
+                    "type": "number"
+                },
+                "firstSerieProfitability": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "firstSerieProfitability",
+                "portfolioProfitability"
+            ],
+            "title": "FromBeginning"
+        }
+    }
+}

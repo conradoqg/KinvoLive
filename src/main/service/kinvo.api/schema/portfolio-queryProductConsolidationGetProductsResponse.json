@@ -1,0 +1,185 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/PortfolioQueryProductConsolidationGetProductsResponse",
+    "definitions": {
+        "PortfolioQueryProductConsolidationGetProductsResponse": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "success": {
+                    "type": "boolean"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Datum"
+                    }
+                },
+                "error": {
+                    "type": "null"
+                }
+            },
+            "required": [
+                "data",
+                "error",
+                "success"
+            ],
+            "title": "PortfolioQueryProductConsolidationGetProductsResponse"
+        },
+        "Datum": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "portfolioProductId": {
+                    "type": "integer"
+                },
+                "productId": {
+                    "type": "integer"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "productTypeId": {
+                    "type": "integer"
+                },
+                "financialInstitutionId": {
+                    "type": "integer"
+                },
+                "financialInstitutionName": {
+                    "type": "string"
+                },
+                "issuerId": {
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "issuerName": {
+                    "anyOf": [
+                        {
+                            "type": "null"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ]
+                },
+                "firstApplicationDate": {
+                    "type": "string"
+                },
+                "lastUpdate": {
+                    "type": "string"
+                },
+                "valueApplied": {
+                    "type": "number"
+                },
+                "equity": {
+                    "type": "number"
+                },
+                "profitability": {
+                    "type": "number"
+                },
+                "portfolioPercentage": {
+                    "type": "number"
+                },
+                "hasBalance": {
+                    "type": "integer"
+                },
+                "hasMovementsWaitingForQuota": {
+                    "type": "boolean"
+                },
+                "productHasQuotation": {
+                    "type": "integer"
+                },
+                "productHasNotPricePublished": {
+                    "type": "boolean"
+                },
+                "productHasPublishedPrice": {
+                    "type": "boolean"
+                },
+                "productHasBeenImported": {
+                    "type": "boolean"
+                },
+                "tagDescription": {
+                    "type": "null"
+                },
+                "tagId": {
+                    "type": "null"
+                },
+                "portfolioCurrencySymbol": {
+                    "$ref": "#/definitions/CurrencySymbol"
+                },
+                "productCurrencySymbol": {
+                    "$ref": "#/definitions/CurrencySymbol"
+                },
+                "productCountryCode": {
+                    "$ref": "#/definitions/ProductCountryCode"
+                },
+                "partnerId": {
+                    "type": "null"
+                },
+                "partnerUserId": {
+                    "type": "null"
+                },
+                "partnerUserAlias": {
+                    "type": "null"
+                },
+                "productCanBeEdited": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "equity",
+                "financialInstitutionId",
+                "financialInstitutionName",
+                "firstApplicationDate",
+                "hasBalance",
+                "hasMovementsWaitingForQuota",
+                "issuerId",
+                "issuerName",
+                "lastUpdate",
+                "partnerId",
+                "partnerUserAlias",
+                "partnerUserId",
+                "portfolioCurrencySymbol",
+                "portfolioPercentage",
+                "portfolioProductId",
+                "productCanBeEdited",
+                "productCountryCode",
+                "productCurrencySymbol",
+                "productHasBeenImported",
+                "productHasNotPricePublished",
+                "productHasPublishedPrice",
+                "productHasQuotation",
+                "productId",
+                "productName",
+                "productTypeId",
+                "profitability",
+                "tagDescription",
+                "tagId",
+                "valueApplied"
+            ],
+            "title": "Datum"
+        },
+        "CurrencySymbol": {
+            "type": "string",
+            "enum": [
+                "BRL",
+                "USD"
+            ],
+            "title": "CurrencySymbol"
+        },
+        "ProductCountryCode": {
+            "type": "string",
+            "enum": [
+                "BR",
+                "US"
+            ],
+            "title": "ProductCountryCode"
+        }
+    }
+}

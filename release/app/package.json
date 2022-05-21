@@ -1,7 +1,7 @@
 {
-  "name": "electron-react-boilerplate",
-  "version": "4.5.0",
-  "description": "A foundation for scalable desktop apps",
+  "name": "kinvo-live",
+  "version": "1.0.0",
+  "description": "Informações sobre o seu portifólio de bandeja",
   "main": "./dist/main/main.js",
   "author": {
     "name": "Electron React Boilerplate Maintainers",
