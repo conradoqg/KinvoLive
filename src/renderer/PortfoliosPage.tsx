@@ -9,7 +9,7 @@ import { LoadingButton } from '@mui/lab';
 import { norm } from '../shared/helpers/math';
 import formatters from '../shared/helpers/formatters'
 import { colorByRange, colorGradient, hexToRgb, rgbToString } from '../shared/helpers/color';
-import logger from './service/logger.service';
+import loggerService from './service/logger.service';
 import Alert from './components/Alert';
 import backendService from './service/backend.service';
 
@@ -32,7 +32,7 @@ export default function PortfoliosPage() {
 
   useEffect(() => {
     const updatePortfolios = async () => {
-      logger.info('Calling getPortfolios')
+      loggerService.debug('Calling getPortfolios')
       setLoadingPortfolioSummary(true)
       try {
         const newPortfolios = await backendService.getPortfolios()
@@ -56,7 +56,7 @@ export default function PortfoliosPage() {
 
   useEffect(() => {
     const updatePortfolioSummary = async () => {
-      logger.info('Calling getPortfolioSummary')
+      loggerService.debug('Calling getPortfolioSummary')
       setLoadingPortfolioSummary(true)
       try {
         const newPortfolioSummary = await backendService.getPortfolioSummary(selectedPortfolio)
@@ -126,7 +126,7 @@ export default function PortfoliosPage() {
   };
 
   const handleRefreshClick = async () => {
-    logger.info('Calling getPortfolioSummary')
+    loggerService.debug('Calling getPortfolioSummary')
     setLoadingPortfolioSummary(true)
     try {
       const newPortfolioSummary = await backendService.getPortfolioSummary(selectedPortfolio)

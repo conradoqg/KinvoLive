@@ -4,7 +4,7 @@ import { Component, Initialize, Inject } from 'tsdi';
 import { semaphore } from 'ts-async-decorators';
 import CredentialStore from '../../store/credential.store';
 import { KinvoCredential } from '../../../shared/type/backend.types';
-import Logger from '../logger.service';
+import LoggerService from '../logger.service';
 import { Convert, PortfolioConsolidateRequest, PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest } from './kinvo.api.type';
 
 type OAuthData = {
@@ -31,7 +31,7 @@ export default class KinvoAPIService {
   private credentialStore: CredentialStore
 
   @Inject()
-  private logger: Logger
+  private loggerService: LoggerService
 
   constructor() {
     this.axiosClient = axios.create();
@@ -43,7 +43,7 @@ export default class KinvoAPIService {
   }
 
   async login(credential: KinvoCredential, store = false) {
-    this.logger.silly('Logging')
+    this.loggerService.debug('Logging')
 
     const loginResponse = await this.axiosClient.post(
       `${this.BASE_URL}/v2/auth/login`,
@@ -54,14 +54,14 @@ export default class KinvoAPIService {
     );
 
     if (loginResponse.data.success === true) {
-      this.logger.silly('Logging success')
+      this.loggerService.debug('Logging success')
       this.setOAuthData({
         accessToken: loginResponse.data.data.accessToken,
         refreshToken: loginResponse.data.data.refreshToken,
       });
       this.setLogged(credential, store)
     } else {
-      this.logger.silly('Logging failed')
+      this.loggerService.debug('Logging failed')
       throw new Error(loginResponse.data.error);
     }
   }
@@ -81,7 +81,7 @@ export default class KinvoAPIService {
   }
 
   private async refresh() {
-    this.logger.silly('Refreshing oAuth')
+    this.loggerService.debug('Refreshing oAuth')
     const refreshResponse = await this.axiosClient.post(
       `${this.BASE_URL}/auth/sessions/refresh-token`,
       {
@@ -94,29 +94,29 @@ export default class KinvoAPIService {
       }
     );
     if (refreshResponse.data.success === true) {
-      this.logger.silly('Refreshing success')
+      this.loggerService.debug('Refreshing success')
       this.setOAuthData({
         accessToken: refreshResponse.data.data.accessToken,
         refreshToken: refreshResponse.data.data.refreshToken
       });
     } else {
-      this.logger.silly('Refresh failed')
+      this.loggerService.debug('Refresh failed')
       throw new Error(refreshResponse.data.error);
     }
   }
 
   @Mutex()
   private async hydrateOAuthData() {
-    this.logger.silly('Hydrating oAuth')
+    this.loggerService.debug('Hydrating oAuth')
     try {
       if (!this.oAuthData || this.oAuthData.accessToken == null) {
-        this.logger.debug('Getting a new token');
+        this.loggerService.debug('Getting a new token');
         await this.login(this.credential)
       } else if (this.oAuthData.expiration.isBefore(dayjs())) {
-        this.logger.debug('Refreshing existing token');
+        this.loggerService.debug('Refreshing existing token');
         await this.refresh()
       } else {
-        this.logger.silly('Hydrate not necessary')
+        this.loggerService.debug('Hydrate not necessary')
       }
     } catch (ex: any) {
       throw new Error(ex.message)
@@ -127,7 +127,7 @@ export default class KinvoAPIService {
     accessToken: string;
     refreshToken: string;
   }) {
-    this.logger.silly('Setting oAuth data')
+    this.loggerService.debug('Setting oAuth data')
     const { accessToken } = token;
     const { refreshToken } = token;
     const base64Url = accessToken.split('.')[1];
@@ -140,9 +140,9 @@ export default class KinvoAPIService {
   }
 
   private async doGetRequest<T extends { success: boolean, error: string }>(converter: (json: string) => T, path: string, trie = 1): Promise<T> {
-    this.logger.silly(`Has credential? ${this.credential != null}`)
+    this.loggerService.debug(`Has credential? ${this.credential != null}`)
     if (this.credential) {
-      this.logger.debug(`Request: POST to ${path}`)
+      this.loggerService.debug(`Request: POST to ${path}`)
       await this.hydrateOAuthData();
       try {
         const getResponse = await this.axiosClient.get(`${this.BASE_URL}${path}`, {
@@ -160,7 +160,7 @@ export default class KinvoAPIService {
         throw new Error(getResponseData.error);
       } catch (ex: any) {
         if (ex.response && ex.response.status === 401 && trie === 1) {
-          this.logger.silly('Received 401, trying again')
+          this.loggerService.debug('Received 401, trying again')
           return this.doGetRequest(converter, path, 2);
         }
         throw new Error(ex.message)
@@ -171,9 +171,9 @@ export default class KinvoAPIService {
   }
 
   private async doPostRequest<T extends { success: boolean, error: string }, P>(requestConverter: (object: P) => string, responseConverter: (json: string) => T, payload: P, path: string, trie = 1): Promise<T> {
-    this.logger.silly(`Has credential? ${this.credential != null}`)
+    this.loggerService.debug(`Has credential? ${this.credential != null}`)
     if (this.credential) {
-      this.logger.debug(`Request: POST to ${path}`)
+      this.loggerService.debug(`Request: POST to ${path}`)
       await this.hydrateOAuthData();
       try {
         const postResponse = await this.axiosClient.post(`${this.BASE_URL}${path}`, requestConverter(payload), {
@@ -191,7 +191,7 @@ export default class KinvoAPIService {
         throw new Error(postResponseData.error);
       } catch (ex: any) {
         if (ex.response && ex.response.status === 401 && trie === 1) {
-          this.logger.silly('Received 401, trying again')
+          this.loggerService.debug('Received 401, trying again')
           return this.doPostRequest(requestConverter, responseConverter, payload, path, 2);
         }
         throw new Error(ex.message)

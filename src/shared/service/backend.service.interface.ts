@@ -10,8 +10,4 @@ export default interface BackendServiceInterface {
   getCredential(): Promise<KinvoCredentialResponse>
 
   logout(): void
-
-  log(type: string, ...args: unknown[]): void
-
-  openLog(): void
 }

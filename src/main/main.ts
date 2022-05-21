@@ -12,12 +12,12 @@ async function main() {
   try {
     await app.whenReady()
 
-    logger.info(`Starting DI controler...`);
+    logger.debug(`Starting DI...`);
     const tsdi = new TSDI();
     tsdi.enableComponentScanner()
     tsdi.get(App)
     tsdi.get(IPCController)
-    logger.info(`Finished DI controler...`);
+    logger.debug(`Finished DI`);
   } catch (ex) {
     logger.error(ex);
   }

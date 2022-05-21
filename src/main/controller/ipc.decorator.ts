@@ -4,20 +4,20 @@ export const IPCController = (): ClassDecorator => {
   }
 }
 
-export const IPCEvent = (async = true): MethodDecorator => {
-  return (target: any, memberName: string) => {
-    Reflect.defineMetadata('ipc-controller:eventName', memberName, target, memberName)
+export const IPCEvent = (options = { log: true }): MethodDecorator => {
+  return (target: unknown, memberName: string) => {
+    Reflect.defineMetadata('ipc-controller:eventName', options, target, memberName)
   }
 }
 
-export const IPCSend = (async = true): PropertyDecorator => {
-  return (target: any, propertyKey: string) => {
-    Reflect.defineMetadata('ipc-controller:sendName', propertyKey, target, propertyKey)
+export const IPCSend = (options = { log: true }): MethodDecorator => {
+  return (target: unknown, memberName: string) => {
+    Reflect.defineMetadata('ipc-controller:sendName', options, target, memberName)
   }
 }
 
-export const IPCInvoke = (async = true): PropertyDecorator => {
-  return (target: any, propertyKey: string) => {
-    Reflect.defineMetadata('ipc-controller:invokeName', propertyKey, target, propertyKey)
+export const IPCInvoke = (options = { log: true }): MethodDecorator => {
+  return (target: unknown, memberName: string) => {
+    Reflect.defineMetadata('ipc-controller:invokeName', options, target, memberName)
   }
 }

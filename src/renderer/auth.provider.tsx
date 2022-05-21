@@ -23,16 +23,16 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const [ready, setReady] = React.useState<boolean>(false);
 
   useEffect(() => {
-    loggerService.info('Getting credential')
+    loggerService.debug('Getting credential')
 
     async function updateCredential() {
       try {
         const kinvoCredential = await backendService.getCredential()
         if (kinvoCredential) {
-          loggerService.info(`Credential received: ${kinvoCredential.email}`)
+          loggerService.debug(`Credential received: ${kinvoCredential.email}`)
           setEmail(kinvoCredential.email)
         } else {
-          loggerService.info('No credential received')
+          loggerService.debug('No credential received')
         }
         setReady(true)
       } catch (ex) {
@@ -78,9 +78,9 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
   const auth = useAuth();
   const location = useLocation();
 
-  loggerService.info(`Is auth ready? ${auth.ready}`)
+  loggerService.debug(`Is auth ready? ${auth.ready}`)
   if (auth.ready) {
-    loggerService.info(`Logged e-mail: ${auth.email}`)
+    loggerService.debug(`Logged e-mail: ${auth.email}`)
     if (!auth.email) {
       // Redirect them to the /login page, but save the current location they were
       // trying to go to when they were redirected. This allows us to send them
@@ -99,7 +99,7 @@ export function AuthStatus() {
   const navigate = useNavigate();
 
   const handleOpenLogClick = () => {
-    backendService.openLog()
+    loggerService.openLog()
   }
 
   if (!auth.email) {

@@ -2,11 +2,9 @@
 import path from 'path';
 import { app, BrowserWindow, shell, Tray, Menu, ipcMain } from 'electron';
 import { Component, Initialize, Inject } from 'tsdi';
-import { resolveHtmlPath } from '../util';
 import TrayWindow from './trayWindow';
-import AppUpdater from './appUpdater';
-import Logger from '../service/logger.service';
-import Config from '../service/config.service';
+import LoggerService from '../service/logger.service';
+import ConfigService from '../service/config.service';
 
 @Component()
 export default class App {
@@ -21,14 +19,14 @@ export default class App {
     : path.join(__dirname, '../../../assets');
 
   @Inject()
-  private logger: Logger
+  private loggerService: LoggerService
 
   @Inject()
-  private config: Config
+  private configService: ConfigService
 
   private async installExtensions() {
     const installer = require('electron-devtools-installer');
-    const forceDownload = this.config.upgradeExtensions;
+    const forceDownload = this.configService.upgradeExtensions;
     const extensions = ['REACT_DEVELOPER_TOOLS'];
 
     return installer
@@ -36,7 +34,7 @@ export default class App {
         extensions.map((name) => installer[name]),
         forceDownload
       )
-      .catch(this.logger.error);
+      .catch(this.loggerService.error);
   };
 
   private getAssetPath(...paths: string[]): string {
@@ -44,8 +42,7 @@ export default class App {
   };
 
   private async createTray() {
-    if (!this.config.isDebug || this.config.forceTray) {
-      this.logger.info(this.getAssetPath('icon.png'))
+    if (!this.configService.isDebug || this.configService.forceTray) {
       this.mainTray = new Tray(this.getAssetPath('icon.png'))
       const contextMenu = Menu.buildFromTemplate([
         {
@@ -67,7 +64,7 @@ export default class App {
   }
 
   private async createTrayWindow() {
-    if (!this.config.isDebug || this.config.forceTray) {
+    if (!this.configService.isDebug || this.configService.forceTray) {
       this.trayWindow = new TrayWindow({
         window: this.mainWindow,
         tray: this.mainTray,
@@ -76,7 +73,7 @@ export default class App {
   }
 
   private async createWindow() {
-    if (this.config.isDebug) {
+    if (this.configService.isDebug) {
       await this.installExtensions();
     }
 
@@ -85,9 +82,9 @@ export default class App {
       width: 530,
       height: 600,
       icon: this.getAssetPath('icon.png'),
-      frame: this.config.isDebug,
-      skipTaskbar: !this.config.isDebug,
-      alwaysOnTop: !this.config.isDebug,
+      frame: this.configService.isDebug,
+      skipTaskbar: !this.configService.isDebug,
+      alwaysOnTop: !this.configService.isDebug,
       webPreferences: {
         preload: app.isPackaged
           ? path.join(__dirname, 'preload.js')
@@ -95,14 +92,14 @@ export default class App {
       },
     });
 
-    this.mainWindow.loadURL(resolveHtmlPath('index.html'));
+    this.mainWindow.loadURL(this.resolveHtmlPath('index.html'));
 
-    if (this.config.isDebug && !this.config.forceTray) {
+    if (this.configService.isDebug && !this.configService.forceTray) {
       this.mainWindow.on('ready-to-show', () => {
         if (!this.mainWindow) {
           throw new Error('"mainWindow" is not defined');
         }
-        if (this.config.startMinimized) {
+        if (this.configService.startMinimized) {
           this.mainWindow.minimize();
         } else {
           this.mainWindow.show();
@@ -122,20 +119,27 @@ export default class App {
       return { action: 'deny' };
     });
 
-    // Remove this if your app does not use auto updates
-    // eslint-disable-next-line
-    //new AppUpdater();
   };
+
+  private resolveHtmlPath(htmlFileName: string): string {
+    if (this.configService.isDebug) {
+      const port = process.env.PORT || 1212;
+      const url = new URL(`http://localhost:${port}`);
+      url.pathname = htmlFileName;
+      return url.href;
+    }
+
+    return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
+  }
 
   @Initialize
   public async init() {
-    if (this.config.isProduction) {
+    if (this.configService.isProduction) {
       const sourceMapSupport = require('source-map-support');
       sourceMapSupport.install();
     }
 
-    if (this.config.isDebug) {
-      this.logger.info('Debugging')
+    if (this.configService.isDebug) {
       require('electron-debug')();
     }
 
@@ -160,7 +164,7 @@ export default class App {
         if (this.mainWindow === null) this.createWindow();
       });
     } catch (ex) {
-      this.logger.error(ex)
+      this.loggerService.error(ex)
     }
   }
 

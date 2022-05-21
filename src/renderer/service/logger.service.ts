@@ -1,33 +1,40 @@
-import backendService from "./backend.service";
-
 /* eslint-disable class-methods-use-this */
-class LoggerService {
+
+import { LoggerServiceInterface } from "shared/service/logger.service.interface";
+
+const { ipcRenderer } = window.electron
+
+class LoggerService implements LoggerServiceInterface {
   public silly(...args: unknown[]) {
-    backendService.log('silly', ...args);
+    ipcRenderer.sendMessage('LoggerService:silly', args);
   }
 
   public debug(...args: unknown[]) {
-    backendService.log('debug', ...args);
+    ipcRenderer.sendMessage('LoggerService:debug', args);
   }
 
   public trace(...args: unknown[]) {
-    backendService.log('trace', ...args);
+    ipcRenderer.sendMessage('LoggerService:trace', args);
   }
 
   public info(...args: unknown[]) {
-    backendService.log('info', ...args);
+    ipcRenderer.sendMessage('LoggerService:info', args);
   }
 
   public warn(...args: unknown[]) {
-    backendService.log('log', ...args);
+    ipcRenderer.sendMessage('LoggerService:warn', args);
   }
 
   public error(...args: unknown[]) {
-    backendService.log('error', ...args);
+    ipcRenderer.sendMessage('LoggerService:error', args);
   }
 
   public fatal(...args: unknown[]) {
-    window.electron.ipcRenderer.sendMessage('fatal', ...args);
+    ipcRenderer.sendMessage('LoggerService:fatal', args);
+  }
+
+  public openLog() {
+    return ipcRenderer.sendMessage('LoggerService:openLog')
   }
 }
 

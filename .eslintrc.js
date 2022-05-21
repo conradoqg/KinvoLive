@@ -9,7 +9,9 @@ module.exports = {
     'max-classes-per-file': 'off',
     'no-await-in-loop': 'off',
     'no-restricted-syntax': 'off',
-    "prettier/prettier": "off",
+    'prettier/prettier': 'off',
+    'no-nested-ternary': 'off',
+    'no-bitwise': 'off'
   },
   parserOptions: {
     ecmaVersion: 2020,

@@ -1,15 +1,14 @@
 import { Component, Inject } from "tsdi";
 import { v5 as uuidv5 } from 'uuid';
 import dayjs, { Dayjs } from "dayjs";
-import { shell } from "electron";
 import BackendServiceInterface from "shared/service/backend.service.interface";
 import { randomFloatFromInterval } from "../../shared/helpers/math";
 import { delay } from "../../shared/helpers/promise";
-import Config from "./config.service";
-import { IPCController, IPCEvent, IPCInvoke } from "../controller/ipc.decorator";
+import ConfigService from "./config.service";
+import { IPCController, IPCInvoke } from "../controller/ipc.decorator";
 import KinvoAPIService from "./kinvo.api/kinvo.api.service";
 import { PortfolioConsolidateResponseData } from "./kinvo.api/kinvo.api.type";
-import Logger from "./logger.service";
+import LoggerService from "./logger.service";
 import { KinvoCredential, KinvoCredentialResponse, Portfolios, PortfolioSummary, ProductTypeId } from "../../shared/type/backend.types";
 import App from "../interface/app";
 import { humanize } from "../../shared/helpers/dayjs";
@@ -18,13 +17,13 @@ import { humanize } from "../../shared/helpers/dayjs";
 @IPCController()
 export default class BackendService implements BackendServiceInterface {
   @Inject()
-  private logger: Logger
+  private loggerService: LoggerService
 
   @Inject()
-  private config: Config
+  private configService: ConfigService
 
   @Inject()
-  private kinvoAPI: KinvoAPIService
+  private kinvoAPIService: KinvoAPIService
 
   @Inject()
   private app: App
@@ -39,12 +38,20 @@ export default class BackendService implements BackendServiceInterface {
   } = {}
 
   private consolidate(portfolioId: number) {
-    if (this.config.mockData) {
-      return Promise.resolve({
-        consolidationRoute: 'QUEUED'
-      } as PortfolioConsolidateResponseData)
+    if (!this.lastConsolidation || dayjs().diff(this.lastConsolidation, 'minutes') > 120) {
+      this.loggerService.debug('Requesting consolidation...')
+      if (this.configService.mockData) {
+        return Promise.resolve({
+          consolidationRoute: 'QUEUED'
+        } as PortfolioConsolidateResponseData)
+      }
+      this.lastConsolidation = dayjs()
+      this.loggerService.debug('Requesting consolidation done.')
+    } else {
+      this.loggerService.debug(`Not consolidating, last was ${humanize(dayjs.duration(dayjs().diff(this.lastConsolidation, 'milliseconds')))} ago`)
     }
-    return this.kinvoAPI.postPortfolioConsolidate({
+
+    return this.kinvoAPIService.postPortfolioConsolidate({
       ignoreCache: false,
       portfolioId
     })
@@ -52,8 +59,8 @@ export default class BackendService implements BackendServiceInterface {
 
   @IPCInvoke()
   getPortfolios(): Promise<Portfolios> {
-    if (this.config.mockData) {
-      return Promise.resolve([{
+    if (this.configService.mockData) {
+      return Promise.resolve<Portfolios>([{
         id: 1,
         title: 'Carteira 1',
         isPrincipal: false,
@@ -68,7 +75,7 @@ export default class BackendService implements BackendServiceInterface {
     }
 
     try {
-      return this.kinvoAPI.getPortfolioCommandPortfolioGetPortfolios() as Promise<Portfolios>;
+      return this.kinvoAPIService.getPortfolioCommandPortfolioGetPortfolios() as Promise<Portfolios>;
     } catch (ex) {
       throw new Error(ex.response ? ex.response.data.error.message : ex.message)
     }
@@ -76,43 +83,48 @@ export default class BackendService implements BackendServiceInterface {
 
   @IPCInvoke()
   async getPortfolioSummary(portfolioId: number): Promise<PortfolioSummary> {
-    if (this.config.mockData) {
-      return Promise.resolve({
+    if (this.configService.mockData) {
+      return Promise.resolve<PortfolioSummary>({
         portfolio: {
+          newValuesAt: dayjs().toDate(),
           profitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
-          profitabilityLast12Months: randomFloatFromInterval(-5, 5, 2)
+          profitabilityLast12Months: randomFloatFromInterval(-5, 5, 2),
+          smallestThisMonthProfitability: randomFloatFromInterval(-5, 5, 2),
+          largestThisMonthProfitability: randomFloatFromInterval(-5, 5, 2),
+          smallestLast12Profitability: randomFloatFromInterval(-5, 5, 2),
+          largestLast12Profitability: randomFloatFromInterval(-5, 5, 2),
+          smallestPortfolioPercentage: randomFloatFromInterval(-5, 5, 2),
+          largestPortfolioPercentage: randomFloatFromInterval(-5, 5, 2),
+          smallestRelativeProfitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
+          largestRelativeProfitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
+          largestRelativeProfitabilityLast12Months: randomFloatFromInterval(-5, 5, 2),
+          smallestRelativeProfitabilityLast12Months: randomFloatFromInterval(-5, 5, 2),
         },
-        products: [
-          {
-            productId: 1,
-            productName: 'Exemplo produto 1',
-            productTypeId: randomFloatFromInterval(1, 12, 0),
-            profitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
-            profitabilityLast12Months: randomFloatFromInterval(-5, 5, 2)
-          }
-        ]
-      } as PortfolioSummary)
+        products: [{
+          productId: 1,
+          productName: 'Exemplo produto 1',
+          productTypeId: ProductTypeId.BDR,
+          productFinantialInstitutionId: randomFloatFromInterval(-5, 5, 2),
+          productFinantialInstitutionName: 'Instituição 1',
+          portfolioPercentage: randomFloatFromInterval(-5, 5, 2),
+          profitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
+          profitabilityLast12Months: randomFloatFromInterval(-5, 5, 2),
+          relativeProfitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
+          relativeProfitabilityLast12Months: randomFloatFromInterval(-5, 5, 2)
+        }]
+      })
     }
 
     try {
-
-      // TODO: Refatorar
-      if (!this.lastConsolidation || dayjs().diff(this.lastConsolidation, 'minutes') > 120) {
-        this.logger.silly('Requesting consolidation...')
-        await this.consolidate(portfolioId)
-        this.lastConsolidation = dayjs()
-        this.logger.silly('Requesting consolidation done.')
-      } else {
-        this.logger.silly(`Not consolidating, last was ${humanize(dayjs.duration(dayjs().diff(this.lastConsolidation, 'milliseconds')))} ago`)
-      }
+      await this.consolidate(portfolioId)
 
       let portfolio = null
       const tries = 10
       let trie = 1
       while (trie <= tries) {
-        portfolio = await this.kinvoAPI.getPortfolioQueryPortfolioConsolidationGetPortfolio(portfolioId)
+        portfolio = await this.kinvoAPIService.getPortfolioQueryPortfolioConsolidationGetPortfolio(portfolioId)
         if (portfolio.lastUpdateDate.toISOString() === '0001-01-01T03:00:00.000Z') {
-          this.logger.silly('Waiting for consolidation...')
+          this.loggerService.debug('Waiting for consolidation...')
           await delay(1000)
         } else {
           break;
@@ -121,9 +133,9 @@ export default class BackendService implements BackendServiceInterface {
       }
 
       const [portfolioProducts, portfolioProfitability, productsStatistic] = await Promise.all([
-        this.kinvoAPI.getPortfolioQueryProductConsolidationGetProducts(portfolioId),
-        this.kinvoAPI.getPortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitability(portfolioId),
-        this.kinvoAPI.postPortfolioQueryProductAnalysisGetProductProftabilityByDateRange({
+        this.kinvoAPIService.getPortfolioQueryProductConsolidationGetProducts(portfolioId),
+        this.kinvoAPIService.getPortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitability(portfolioId),
+        this.kinvoAPIService.postPortfolioQueryProductAnalysisGetProductProftabilityByDateRange({
           initialDate: portfolio.firstApplicationDate,
           finalDate: portfolio.lastUpdateDate,
           portfolioId
@@ -141,7 +153,7 @@ export default class BackendService implements BackendServiceInterface {
       }
       if (this.portfoliosNewValuesData[portfolioId] && this.portfoliosNewValuesData[portfolioId].hash !== portfolioStateHash) {
         this.portfoliosNewValuesData[portfolioId] = newValuesCandidate
-        this.logger.info('Novo valor')
+        this.loggerService.debug('Novo valor')
         this.app.notify()
       }
 
@@ -195,33 +207,23 @@ export default class BackendService implements BackendServiceInterface {
   @IPCInvoke()
   async login(credential: KinvoCredential, store = false): Promise<boolean> {
     try {
-      this.logger.silly('Logining in')
-      await this.kinvoAPI.login(credential, store)
-      this.logger.silly('Logged')
+      this.loggerService.debug('Logining in')
+      await this.kinvoAPIService.login(credential, store)
+      this.loggerService.debug('Logged')
       return true
     } catch (ex) {
-      this.logger.warn('Logging failed')
+      this.loggerService.warn('Logging failed')
       throw new Error(ex.response ? ex.response.data.error.message : ex.message)
     }
   }
 
   @IPCInvoke()
   getCredential(): Promise<KinvoCredentialResponse> {
-    return Promise.resolve(this.kinvoAPI.credential as KinvoCredentialResponse)
+    return Promise.resolve<KinvoCredentialResponse>({ email: this.kinvoAPIService.credential.email })
   }
 
   @IPCInvoke()
   async logout() {
-    this.kinvoAPI.logout()
-  }
-
-  @IPCEvent()
-  log(type: string, ...args: unknown[]): void {
-    this.logger[type](...args)
-  }
-
-  @IPCEvent()
-  openLog() {
-    shell.openExternal(this.logger.LOG_PATH);
+    this.kinvoAPIService.logout()
   }
 }

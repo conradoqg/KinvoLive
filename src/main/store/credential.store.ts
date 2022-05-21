@@ -2,8 +2,8 @@ import { safeStorage } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
 import { Component, Inject } from 'tsdi';
-import Logger from '../service/logger.service';
-import Config from '../service/config.service';
+import LoggerService from '../service/logger.service';
+import ConfigService from '../service/config.service';
 
 @Component
 export default class CredentialStore {
@@ -15,7 +15,7 @@ export default class CredentialStore {
 
   private readonly ENCRYPTION_KEY = 'ae211b28-c6f9-411b-91d7-465455201961'
 
-  constructor(@Inject() private config: Config, @Inject() private logger: Logger) {
+  constructor(@Inject() private configService: ConfigService, @Inject() private loggerService: LoggerService) {
     const options: Store.Options<Record<string, string>> = {
       name: this.CREDENTIAL_STORE_NAME,
       watch: true,
@@ -23,14 +23,14 @@ export default class CredentialStore {
     }
 
     if (!safeStorage.isEncryptionAvailable()) {
-      this.logger.warn('Store not secured')
+      this.loggerService.warn('Store not secured')
       this.secure = false
     } else {
-      this.logger.silly('Store secured')
+      this.loggerService.debug('Store secured')
     }
 
-    if (this.config.isDebug) {
-      options.cwd = path.join(this.config.dataPath, 'store')
+    if (this.configService.isDebug) {
+      options.cwd = path.join(this.configService.dataPath, 'store')
     }
 
     this.store = new Store<Record<string, string>>(options);
