@@ -1,4 +1,5 @@
 import { BrowserWindow, ipcMain, Tray, screen } from "electron";
+import { platform } from "os";
 
 type Options = {
   tray?: Tray;
@@ -174,12 +175,29 @@ export default class TrayWindow {
 
   calculateWindowPosition() {
     const screenBounds = screen.getPrimaryDisplay().size;
-    const trayBounds = this.tray.getBounds();
+
+    let referenceX = null
+    let referenceY = null
+    let referenceWidth = null
+    let referenceHeight = null
+    if (platform() === 'linux') {
+      const mouseBounds = screen.getCursorScreenPoint()
+      referenceX = mouseBounds.x
+      referenceY = mouseBounds.y
+      referenceWidth = 0
+      referenceHeight = 0
+    } else {
+      const trayBounds = this.tray.getBounds();
+      referenceX = trayBounds.x
+      referenceY = trayBounds.y
+      referenceWidth = trayBounds.width
+      referenceHeight = trayBounds.height
+    }
 
     // where is the icon on the screen?
     let trayPos = 4; // 1:top-left 2:top-right 3:bottom-left 4.bottom-right
-    trayPos = trayBounds.y > screenBounds.height / 2 ? trayPos : trayPos / 2;
-    trayPos = trayBounds.x > screenBounds.width / 2 ? trayPos : trayPos - 1;
+    trayPos = referenceY > screenBounds.height / 2 ? trayPos : trayPos / 2;
+    trayPos = referenceX > screenBounds.width / 2 ? trayPos : trayPos - 1;
 
     const DEFAULT_MARGIN = { x: this.margin_x, y: this.margin_y };
 
@@ -189,31 +207,31 @@ export default class TrayWindow {
     // calculate the new window position
     switch (trayPos) {
       case 1: // for TOP - LEFT
-        x = Math.floor(trayBounds.x + DEFAULT_MARGIN.x + trayBounds.width / 2);
-        y = Math.floor(trayBounds.y + DEFAULT_MARGIN.y + trayBounds.height / 2);
+        x = Math.floor(referenceX + DEFAULT_MARGIN.x + referenceWidth / 2);
+        y = Math.floor(referenceY + DEFAULT_MARGIN.y + referenceHeight / 2);
         break;
 
       case 2: // for TOP - RIGHT
         x = Math.floor(
-          trayBounds.x - this.width - DEFAULT_MARGIN.x + trayBounds.width / 2
+          referenceX - this.width - DEFAULT_MARGIN.x + referenceWidth / 2
         );
-        y = Math.floor(trayBounds.y + DEFAULT_MARGIN.y + trayBounds.height / 2);
+        y = Math.floor(referenceY + DEFAULT_MARGIN.y + referenceHeight / 2);
         break;
 
       default:
       case 3: // for BOTTOM - LEFT
-        x = Math.floor(trayBounds.x + DEFAULT_MARGIN.x + trayBounds.width / 2);
+        x = Math.floor(referenceX + DEFAULT_MARGIN.x + referenceWidth / 2);
         y = Math.floor(
-          trayBounds.y - this.height - DEFAULT_MARGIN.y + trayBounds.height / 2
+          referenceY - this.height - DEFAULT_MARGIN.y + referenceHeight / 2
         );
         break;
 
       case 4: // for BOTTOM - RIGHT
         x = Math.floor(
-          trayBounds.x - this.width - DEFAULT_MARGIN.x + trayBounds.width / 2
+          referenceX - this.width - DEFAULT_MARGIN.x + referenceWidth / 2
         );
         y = Math.floor(
-          trayBounds.y - this.height - DEFAULT_MARGIN.y + trayBounds.height / 2
+          referenceY - this.height - DEFAULT_MARGIN.y + referenceHeight / 2
         );
         break;
     }

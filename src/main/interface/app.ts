@@ -49,12 +49,18 @@ export default class App {
       this.mainTray = new Tray(this.getAssetPath('icon.png'))
       const contextMenu = Menu.buildFromTemplate([
         {
+          label: 'Abrir', type: 'normal', click: () => {
+            this.trayWindow.toggleWindow()
+          },
+        },
+        { type: 'separator' },
+        {
           label: 'Sair', type: 'normal', click: () => {
             this.mainWindow.destroy();
             this.mainTray.destroy();
             app.quit();
-          },
-        },
+          }
+        }
       ])
       this.mainTray.setContextMenu(contextMenu)
     }
@@ -162,7 +168,7 @@ export default class App {
     if (this.mainWindow && this.mainTray && !this.mainWindow.isVisible()) {
       this.mainTray.setImage(this.getAssetPath('icon-notify.png'))
 
-      ipcMain.once('tray-window-clicked', () => {
+      ipcMain.once('tray-window-visible', () => {
         this.mainTray.setImage(this.getAssetPath('icon.png'))
       })
     }
