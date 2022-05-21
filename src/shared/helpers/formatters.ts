@@ -1,6 +1,6 @@
 import numeral from 'numeral';
 import { ProductTypeId } from '../type/backend.types';
-import adornments from './adornments'
+import adornments from '../i18n/adornments'
 
 export default {
   percentage: (value: number) => numeral(value * 100).format('0.00') + adornments.percentage(),

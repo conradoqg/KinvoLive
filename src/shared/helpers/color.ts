@@ -1,6 +1,6 @@
 /* eslint-disable no-bitwise */
 import { red, pink, purple, indigo, blue, cyan, teal, green, lime, yellow, amber, orange, brown, grey, blueGrey } from '@mui/material/colors'
-import { norm } from '../math';
+import { norm } from './math';
 
 const baseHues = [red, blue, green, yellow, grey, pink, cyan, lime, amber, blueGrey, purple, teal, indigo, orange, brown];
 

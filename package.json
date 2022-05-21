@@ -228,7 +228,6 @@
     "electron-store": "^8.0.1",
     "electron-updater": "^4.6.5",
     "history": "^5.3.0",
-    "memoizee": "^0.4.15",
     "numeral": "^2.0.6",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

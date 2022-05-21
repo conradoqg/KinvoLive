@@ -6,9 +6,9 @@ import { blue, green, red } from '@mui/material/colors';
 import dayjs from 'dayjs';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
-import { norm } from '../shared/math';
-import formatters from '../shared/i18n/formatters'
-import { colorByRange, colorGradient, hexToRgb, rgbToString } from '../shared/i18n/color';
+import { norm } from '../shared/helpers/math';
+import formatters from '../shared/helpers/formatters'
+import { colorByRange, colorGradient, hexToRgb, rgbToString } from '../shared/helpers/color';
 import logger from './service/logger.service';
 import Alert from './components/Alert';
 import backendService from './service/backend.service';

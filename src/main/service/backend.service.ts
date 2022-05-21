@@ -2,8 +2,9 @@ import { Component, Inject } from "tsdi";
 import { v5 as uuidv5 } from 'uuid';
 import dayjs, { Dayjs } from "dayjs";
 import { shell } from "electron";
-import { randomFloatFromInterval } from "../../shared/math";
-import { delay } from "../../shared/promise";
+import BackendServiceInterface from "shared/service/backend.service.interface";
+import { randomFloatFromInterval } from "../../shared/helpers/math";
+import { delay } from "../../shared/helpers/promise";
 import Config from "./config.service";
 import { IPCController, IPCEvent, IPCInvoke } from "../controller/ipc.decorator";
 import KinvoAPIService from "./kinvo.api/kinvo.api.service";
@@ -11,11 +12,11 @@ import { PortfolioConsolidateResponseData } from "./kinvo.api/kinvo.api.type";
 import Logger from "./logger.service";
 import { KinvoCredential, KinvoCredentialResponse, Portfolios, PortfolioSummary, ProductTypeId } from "../../shared/type/backend.types";
 import App from "../interface/app";
-import { humanize } from "../../shared/dayjs";
+import { humanize } from "../../shared/helpers/dayjs";
 
 @Component()
 @IPCController()
-export default class BackendService {
+export default class BackendService implements BackendServiceInterface {
   @Inject()
   private logger: Logger
 
@@ -205,8 +206,8 @@ export default class BackendService {
   }
 
   @IPCInvoke()
-  getCredential(): KinvoCredentialResponse {
-    return this.kinvoAPI.credential as KinvoCredentialResponse
+  getCredential(): Promise<KinvoCredentialResponse> {
+    return Promise.resolve(this.kinvoAPI.credential as KinvoCredentialResponse)
   }
 
   @IPCInvoke()

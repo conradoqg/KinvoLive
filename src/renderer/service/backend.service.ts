@@ -1,3 +1,4 @@
+import BackendServiceInterface from "shared/service/backend.service.interface";
 import { KinvoCredential, KinvoCredentialResponse, Portfolios, PortfolioSummary } from "shared/type/backend.types"
 
 /* eslint-disable class-methods-use-this */
@@ -5,8 +6,7 @@ const { ipcRenderer } = window.electron
 
 const InvokeError = Error;
 
-class BackendService {
-
+class BackendService implements BackendServiceInterface {
   private parseErrorMessage(ex): string {
     const myRegexp = /^Error invoking remote method '[a-zA-Z0-9]+': Error: (.*)/g;
     const match = myRegexp.exec(ex.message);
@@ -51,6 +51,10 @@ class BackendService {
 
   async openLog() {
     return ipcRenderer.sendMessage('openLog')
+  }
+
+  log(type: string, ...args: unknown[]): void {
+    return ipcRenderer.sendMessage('log', [type, ...args]);
   }
 }
 
