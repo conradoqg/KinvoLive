@@ -118,7 +118,7 @@ export default class KinvoAPIService {
       } else {
         this.loggerService.debug('Hydrate not necessary')
       }
-    } catch (ex: any) {
+    } catch (ex) {
       throw new Error(ex.message)
     }
   }
@@ -158,7 +158,7 @@ export default class KinvoAPIService {
           return getResponseData as T;
         }
         throw new Error(getResponseData.error);
-      } catch (ex: any) {
+      } catch (ex) {
         if (ex.response && ex.response.status === 401 && trie === 1) {
           this.loggerService.debug('Received 401, trying again')
           return this.doGetRequest(converter, path, 2);
@@ -189,7 +189,7 @@ export default class KinvoAPIService {
           return postResponseData as T;
         }
         throw new Error(postResponseData.error);
-      } catch (ex: any) {
+      } catch (ex) {
         if (ex.response && ex.response.status === 401 && trie === 1) {
           this.loggerService.debug('Received 401, trying again')
           return this.doPostRequest(requestConverter, responseConverter, payload, path, 2);
