@@ -8,3 +8,11 @@ export function randomFloatFromInterval(min: number, max: number, fractionDigits
     (Math.random() * (max - min) + min) * fractionMultiplier,
   ) / fractionMultiplier
 }
+
+export function smallest<T>(array: T[], getProperty: (data: T) => number) {
+  return array.map(item => getProperty(item)).reduce((acc, field) => Math.min(acc, field), Number.MAX_VALUE)
+}
+
+export function largest<T>(array: T[], getProperty: (data: T) => number) {
+  return array.map(item => getProperty(item)).reduce((acc, field) => Math.max(acc, field), Number.MIN_VALUE)
+}

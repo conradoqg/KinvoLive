@@ -100,12 +100,12 @@ const configuration: webpack.Configuration = {
     ...(requiredByDLLConfig
       ? []
       : [
-          new webpack.DllReferencePlugin({
-            context: webpackPaths.dllPath,
-            manifest: require(manifest),
-            sourceType: 'var',
-          }),
-        ]),
+        new webpack.DllReferencePlugin({
+          context: webpackPaths.dllPath,
+          manifest: require(manifest),
+          sourceType: 'var',
+        }),
+      ]),
 
     new webpack.NoEmitOnErrorsPlugin(),
 
@@ -162,26 +162,22 @@ const configuration: webpack.Configuration = {
     historyApiFallback: {
       verbose: true,
     },
-    setupMiddlewares(middlewares) {
-      console.log('Starting preload.js builder...');
-      const preloadProcess = spawn('npm', ['run', 'start:preload'], {
+    onBeforeSetupMiddleware() {
+      console.log('Starting Main Process...');
+      let args = ['run', 'start:main'];
+      if (process.env.MAIN_ARGS) {
+        args = args.concat(
+          ['--', ...process.env.MAIN_ARGS.matchAll(/"[^"]+"|[^\s"]+/g)].flat()
+        );
+      }
+      spawn('npm', args, {
         shell: true,
+        env: process.env,
         stdio: 'inherit',
       })
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         .on('close', (code: number) => process.exit(code!))
         .on('error', (spawnError) => console.error(spawnError));
-
-      console.log('Starting Main Process...');
-      spawn('npm', ['run', 'start:main'], {
-        shell: true,
-        stdio: 'inherit',
-      })
-        .on('close', (code: number) => {
-          preloadProcess.kill();
-          process.exit(code!);
-        })
-        .on('error', (spawnError) => console.error(spawnError));
-      return middlewares;
     },
   },
 };

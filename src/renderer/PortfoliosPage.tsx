@@ -152,7 +152,6 @@ export default function PortfoliosPage() {
           <Grid item xs="auto">
             <ToggleButtonGroup
               sx={{ m: 1 }}
-              color="primary"
               value={valueType}
               size='small'
               exclusive
