@@ -1,9 +1,11 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { Divider, FormControl, Grid, InputLabel, Link, MenuItem, Paper, Select, Skeleton, Snackbar, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
+import { ButtonGroup, Divider, FormControl, Grid, InputLabel, Link, MenuItem, Paper, Select, Skeleton, Snackbar, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import { Portfolios, PortfolioSummary } from 'shared/type/backend.types';
 import React, { useEffect, useState } from 'react';
 import { blue, green, red } from '@mui/material/colors';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
 import { norm } from '../shared/helpers/math';
@@ -12,18 +14,20 @@ import { colorByRange, colorGradient, hexToRgb, rgbToString } from '../shared/he
 import loggerService from './service/logger.service';
 import Alert from './components/Alert';
 import backendService from './service/backend.service';
+import { capitalizeFirstLetter } from '../shared/helpers/string';
 
 type SortOptions = {
   field: string
   order: number
 }
 
-// TODO: Centralizar
+// TODO: Centralize
 const UPDATE_INTERVAL = dayjs.duration(30, 'minute').asMilliseconds()
 
 export default function PortfoliosPage() {
   const [portfolios, setPortfolios] = useState<Portfolios>(null)
   const [selectedPortfolio, setSelectedPortfolio] = useState<number>(null)
+  const [selectedMonth, setSelectedMonth] = useState<Dayjs>(null)
   const [portfolioSummary, setPortfolioSummary] = useState<PortfolioSummary>(null)
   const [sortOptions, setSortOptions] = useState<SortOptions>({ field: 'relativeProfitabilityThisMonth', order: 1 })
   const [errorMessage, setErrorMessage] = useState<string>(null)
@@ -49,8 +53,8 @@ export default function PortfoliosPage() {
 
   useEffect(() => {
     if ((!selectedPortfolio && portfolios && portfolios.length > 0) || (selectedPortfolio && !portfolios.find(portfolio => portfolio.id === selectedPortfolio))) {
-      const principal = portfolios.find(portfolio => portfolio.isPrincipal)
-      setSelectedPortfolio(principal.id)
+      const principalPortfolio = portfolios.find(portfolio => portfolio.isPrincipal)
+      setSelectedPortfolio(principalPortfolio.id)
     }
   }, [portfolios, selectedPortfolio])
 
@@ -59,7 +63,7 @@ export default function PortfoliosPage() {
       loggerService.debug('Calling getPortfolioSummary')
       setLoadingPortfolioSummary(true)
       try {
-        const newPortfolioSummary = await backendService.getPortfolioSummary(selectedPortfolio)
+        const newPortfolioSummary = await backendService.getPortfolioSummary(selectedPortfolio, selectedMonth ? selectedMonth.toDate() : undefined)
         setPortfolioSummary(newPortfolioSummary)
       } catch (ex) {
         setErrorMessage(ex.message)
@@ -74,7 +78,7 @@ export default function PortfoliosPage() {
 
     const checkForUpdateInterval = setInterval(() => updatePortfolioSummary(), UPDATE_INTERVAL)
     return () => clearInterval(checkForUpdateInterval)
-  }, [selectedPortfolio])
+  }, [selectedPortfolio, selectedMonth])
 
   const sortedProducts = portfolioSummary && portfolioSummary.products.
     sort((leftProduct, rightProduct) => leftProduct[sortOptions.field] > rightProduct[sortOptions.field] ? sortOptions.order * -1 : sortOptions.order * 1)
@@ -86,7 +90,7 @@ export default function PortfoliosPage() {
 
   const changeSort = (field: string) => setSortOptions({ field, order: sortOptions.order * -1 })
 
-  // TODO: Refatorar
+  // TODO: Refactor
   const colorByValue = (referenceField: string, value: number) => {
     const roundedValue = Math.round((value + Number.EPSILON) * 100) / 100
     let normalizedValue = null
@@ -121,7 +125,7 @@ export default function PortfoliosPage() {
     return rgbToString(gradient)
   }
 
-  const handleValueTypeChange = (event: React.MouseEvent<HTMLElement>, newValueType: string) => {
+  const handleValueTypeChange = (_event: React.MouseEvent<HTMLElement>, newValueType: string) => {
     setValueType(newValueType);
   };
 
@@ -129,7 +133,7 @@ export default function PortfoliosPage() {
     loggerService.debug('Calling getPortfolioSummary')
     setLoadingPortfolioSummary(true)
     try {
-      const newPortfolioSummary = await backendService.getPortfolioSummary(selectedPortfolio)
+      const newPortfolioSummary = await backendService.getPortfolioSummary(selectedPortfolio, selectedMonth ? selectedMonth.toDate() : undefined)
       setPortfolioSummary(newPortfolioSummary)
     } catch (ex) {
       setErrorMessage(ex.message)
@@ -138,10 +142,46 @@ export default function PortfoliosPage() {
     }
   }
 
-  // TODO: Refatorar
+  const handleMonthChange = async (direction: number) => {
+    let newMonth = selectedMonth
+    if (!selectedMonth) newMonth = dayjs(portfolioSummary.portfolio.monthReference)
+    newMonth = newMonth.add(direction, 'month')
+    loggerService.debug(`Changing month to ${newMonth.toISOString()}`)
+    setSelectedMonth(newMonth)
+  }
+
+  // TODO: Refactor
   return (
     <>
       <Paper elevation={0} sx={{ padding: 1 }}>
+        <Grid container alignItems='center' textAlign='center'>
+          <Grid item xs>
+            <FormControl sx={{ m: 1, minWidth: 150 }} size="small">
+              <InputLabel id="demo-select-small">Carteira</InputLabel>
+              <Select
+                labelId="demo-select-small"
+                id="demo-simple-select"
+                value={selectedPortfolio !== null ? selectedPortfolio.toString() : ''}
+                label="Carteira"
+                onChange={(event) => setSelectedPortfolio(parseInt(event.target.value, 10))}
+              >
+                {portfolios ? portfolios.map((portifolio) => <MenuItem key={portifolio.id} value={portifolio.id}>{portifolio.title}</MenuItem>) : <Skeleton />}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs>
+            <ButtonGroup variant="contained" aria-label="outlined primary button group">
+              <LoadingButton onClick={() => handleMonthChange(-1)} size="small" loading={loadingPortfolioSummary} variant="contained" disabled={dayjs().subtract(2, 'months').isSameOrAfter(selectedMonth, 'month')}><KeyboardArrowLeftIcon /></LoadingButton>
+              <Typography alignSelf='center' sx={{ marginLeft: 3, marginRight: 3 }}>{loadingPortfolioSummary ? <Skeleton width={50} /> : (portfolioSummary && capitalizeFirstLetter(dayjs(portfolioSummary.portfolio.monthReference).format('MMM - YY')))}</Typography>
+              <LoadingButton onClick={() => handleMonthChange(1)} size="small" loading={loadingPortfolioSummary} variant="contained" disabled={dayjs().isSameOrBefore(selectedMonth, 'month')}> <KeyboardArrowRightIcon /></LoadingButton>
+            </ButtonGroup>
+          </Grid>
+          <Grid item xs={false}>
+            <LoadingButton size="small" loading={loadingPortfolioSummary} variant='contained' onClick={handleRefreshClick}>
+              <RefreshIcon />
+            </LoadingButton>
+          </Grid>
+        </Grid>
         <Grid container alignItems='center'>
           <Grid item xs textAlign='center'>
             <b>Mês (%):</b> {portfolioSummary ? (<Typography sx={{ display: 'inline', color: colorByValue('M', portfolioSummary.portfolio.profitabilityThisMonth) }}>{formatters.percentage(portfolioSummary.portfolio.profitabilityThisMonth / 100)}</Typography>) : (<Typography sx={{ display: 'inline' }}><Skeleton variant="text" width={30} sx={{ display: 'inline-block' }} /></Typography>)}
@@ -157,28 +197,9 @@ export default function PortfoliosPage() {
               exclusive
               onChange={handleValueTypeChange}
             >
-              <ToggleButton value="proportional"><Tooltip title="Proporcional"><Typography>∝</Typography></Tooltip></ToggleButton>
-              <ToggleButton value="absolute"><Tooltip title="Porcentagem"><Typography>%</Typography></Tooltip></ToggleButton>
+              <ToggleButton disabled={loadingPortfolioSummary} value="proportional"><Tooltip title="Proporcional"><Typography>∝</Typography></Tooltip></ToggleButton>
+              <ToggleButton disabled={loadingPortfolioSummary} value="absolute"><Tooltip title="Porcentagem"><Typography>%</Typography></Tooltip></ToggleButton>
             </ToggleButtonGroup>
-          </Grid>
-          <Grid item xs>
-            <FormControl sx={{ m: 1, minWidth: 150 }} size="small">
-              <InputLabel id="demo-select-small">Carteira</InputLabel>
-              <Select
-                labelId="demo-select-small"
-                id="demo-simple-select"
-                value={selectedPortfolio !== null ? selectedPortfolio.toString() : ''}
-                label="Carteira"
-                onChange={(event) => setSelectedPortfolio(parseInt(event.target.value, 10))}
-              >
-                {portfolios ? portfolios.map((portifolio) => <MenuItem key={portifolio.id} value={portifolio.id}>{portifolio.title}</MenuItem>) : <Skeleton />}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item >
-            <LoadingButton size='small' loading={loadingPortfolioSummary} variant='contained' onClick={handleRefreshClick}>
-              <RefreshIcon />
-            </LoadingButton>
           </Grid>
         </Grid>
         <Grid container wrap="nowrap" >
@@ -199,8 +220,8 @@ export default function PortfoliosPage() {
           .map(product => (
             <React.Fragment key={product.productId}>
               <Grid container wrap="nowrap">
-                <Grid item xs={false} sx={{ backgroundColor: formatters.categoryFormatter[product.productTypeId].color, minWidth: 20 }}><Tooltip title={formatters.categoryFormatter[product.productTypeId].displayText} placement="right"><Typography>&nbsp;</Typography></Tooltip></Grid>
-                <Grid item xs zeroMinWidth><Tooltip title={product.productName}><Typography noWrap paddingLeft={1}>{product.productName}</Typography></Tooltip></Grid>
+                <Grid item xs={false} sx={{ backgroundColor: formatters.categoryFormatter[product.productTypeId].color, minWidth: 20 }}><Tooltip title={formatters.categoryFormatter[product.productTypeId].displayText} placement="right" disableInteractive><Typography>&nbsp;</Typography></Tooltip></Grid>
+                <Grid item xs zeroMinWidth><Tooltip title={product.productName} disableInteractive><Typography noWrap paddingLeft={1}>{product.productName}</Typography></Tooltip></Grid>
                 {valueType === 'proportional' && (<>
                   <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline', color: colorByValue('MR', product.relativeProfitabilityThisMonth) }}>{formatters.percentage(product.relativeProfitabilityThisMonth / 100)}</Typography></Grid>
                   <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline', color: colorByValue('12MR', product.relativeProfitabilityLast12Months) }}>{formatters.percentage(product.relativeProfitabilityLast12Months / 100)}</Typography></Grid>

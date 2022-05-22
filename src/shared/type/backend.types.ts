@@ -27,6 +27,9 @@ export type Portfolios = {
 export type PortfolioSummary = {
   portfolio: {
     newValuesAt: Date;
+    monthReference: Date;
+    firstApplicationDate: Date,
+    lastUpdateDate: Date,
     profitabilityThisMonth: number;
     profitabilityLast12Months: number;
     smallestThisMonthProfitability: number;

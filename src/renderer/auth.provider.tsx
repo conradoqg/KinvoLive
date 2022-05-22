@@ -6,7 +6,7 @@ import pkg from '../../package.json'
 import backendService from './service/backend.service';
 import loggerService from './service/logger.service';
 
-// TODO: Centralizar
+// TODO: Centralize
 const UPDATE_INTERVAL = dayjs.duration(5, 'minute').asMilliseconds()
 
 interface AuthContextType {

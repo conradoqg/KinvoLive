@@ -21,9 +21,9 @@ class BackendService implements BackendServiceInterface {
     }
   }
 
-  async getPortfolioSummary(portfolioId: number): Promise<PortfolioSummary> {
+  async getPortfolioSummary(portfolioId: number, referenceMonth: Date): Promise<PortfolioSummary> {
     try {
-      return await ipcRenderer.invoke<PortfolioSummary>('BackendService:getPortfolioSummary', portfolioId)
+      return await ipcRenderer.invoke<PortfolioSummary>('BackendService:getPortfolioSummary', portfolioId, referenceMonth)
     } catch (ex) {
       throw new InvokeError(BackendService.parseErrorMessage(ex))
     }

@@ -82,11 +82,14 @@ export default class BackendService implements BackendServiceInterface {
   }
 
   @IPCInvoke()
-  async getPortfolioSummary(portfolioId: number): Promise<PortfolioSummary> {
+  async getPortfolioSummary(portfolioId: number, month?: Date): Promise<PortfolioSummary> {
     if (this.configService.mockData) {
       return Promise.resolve<PortfolioSummary>({
         portfolio: {
           newValuesAt: dayjs().toDate(),
+          monthReference: dayjs().toDate(),
+          firstApplicationDate: dayjs().subtract(1, 'month').toDate(),
+          lastUpdateDate: dayjs().subtract(2, 'days').toDate(),
           profitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
           profitabilityLast12Months: randomFloatFromInterval(-5, 5, 2),
           smallestThisMonthProfitability: randomFloatFromInterval(-5, 5, 2),
@@ -116,7 +119,9 @@ export default class BackendService implements BackendServiceInterface {
     }
 
     try {
-      await this.consolidate(portfolioId)
+      if (!this.configService.isDebug) {
+        await this.consolidate(portfolioId)
+      }
 
       let portfolio: PortfolioQueryPortfolioConsolidationGetPortfolioResponseData = null
       const tries = 10
@@ -132,17 +137,26 @@ export default class BackendService implements BackendServiceInterface {
         trie += 1
       }
 
-      const referenceMonth = dayjs(portfolio.lastUpdateDate).utc(true)
+      let monthReference = dayjs(portfolio.lastUpdateDate).utc(true)
+
+      if (month) {
+        monthReference = dayjs.min(dayjs(month).utc().endOf('month').startOf('day'), monthReference)
+      }
+
+      this.loggerService.debug(`firstApplicationDate: ${dayjs(portfolio.firstApplicationDate).utc(true).toISOString()}`)
+      this.loggerService.debug(`lastUpdateDate: ${dayjs(portfolio.lastUpdateDate).utc(true).toISOString()}`)
+      this.loggerService.debug(`monthReference: ${monthReference.toISOString()}`)
+      this.loggerService.debug(`month: ${month ? dayjs(month).toISOString() : 'undefined'}`)
 
       const [portfolioStatistics, productsStatistics] = await Promise.all([
         this.kinvoAPIService.postPortfolioQueryPortfolioStatisticsGetStatisticsByDate({
           initialDate: portfolio.firstApplicationDate,
-          finalDate: referenceMonth.toDate(),
+          finalDate: monthReference.toDate(),
           portfolioId
         }),
         this.kinvoAPIService.postPortfolioQueryProductAnalysisGetProductProftabilityByDateRange({
           initialDate: portfolio.firstApplicationDate,
-          finalDate: referenceMonth.toDate(),
+          finalDate: monthReference.toDate(),
           portfolioId
         })
       ])
@@ -154,23 +168,26 @@ export default class BackendService implements BackendServiceInterface {
       const parseEpoch = (epoch: number): Dayjs => dayjs(epoch * 1000).utc().tz('America/Sao_Paulo', true)
 
       const monthlyProfitability = portfolioStatistics.portfolioProfitability.monthlyProfitability.flatMap(item => item.months).sort((a, b) => a.epochMonthlyReferenceDate - b.epochMonthlyReferenceDate)
-      const monthlyProfitabilityBeforeReferenceDate = monthlyProfitability.filter(monthProfitability => parseEpoch(monthProfitability.epochMonthlyReferenceDate).isSameOrBefore(referenceMonth, 'month'))
+      const monthlyProfitabilityBeforeReferenceDate = monthlyProfitability.filter(monthProfitability => parseEpoch(monthProfitability.epochMonthlyReferenceDate).isSameOrBefore(monthReference, 'month'))
 
       const thisMonth = monthlyProfitabilityBeforeReferenceDate.slice(-1)
       const last12Months = monthlyProfitabilityBeforeReferenceDate.slice(-12)
 
-      const thisMonthProfitability = (thisMonth.reduce((acc, month) => acc * (1 + (month.profitability / 100)), 1) - 1) * 100
-      const last12MonthsProfitability = (last12Months.reduce((acc, month) => acc * (1 + (month.profitability / 100)), 1) - 1) * 100
+      const thisMonthProfitability = (thisMonth.reduce((acc, monthItem) => acc * (1 + (monthItem.profitability / 100)), 1) - 1) * 100
+      const last12MonthsProfitability = (last12Months.reduce((acc, monthItem) => acc * (1 + (monthItem.profitability / 100)), 1) - 1) * 100
 
       const result: PortfolioSummary = {
         portfolio: {
           newValuesAt: this.portfoliosNewValuesData[portfolioId].newValuesAt.toDate(),
+          monthReference: monthReference.toDate(),
+          firstApplicationDate: dayjs(portfolio.firstApplicationDate).utc(true).toDate(),
+          lastUpdateDate: dayjs(portfolio.lastUpdateDate).utc(true).toDate(),
           profitabilityThisMonth: thisMonthProfitability,
           profitabilityLast12Months: last12MonthsProfitability,
-          smallestThisMonthProfitability: smallest(productsStatistics, (product) => product.inTheMonth.portfolioProfitability),
-          largestThisMonthProfitability: largest(productsStatistics, (product) => product.inTheMonth.portfolioProfitability),
-          smallestLast12Profitability: smallest(productsStatistics, (product) => product.inTwelveMonths.portfolioProfitability),
-          largestLast12Profitability: largest(productsStatistics, (product) => product.inTwelveMonths.portfolioProfitability),
+          smallestThisMonthProfitability: 0,
+          largestThisMonthProfitability: 0,
+          smallestLast12Profitability: 0,
+          largestLast12Profitability: 0,
           smallestPortfolioPercentage: 0,
           largestPortfolioPercentage: 0,
           smallestRelativeProfitabilityThisMonth: 0,
@@ -195,6 +212,10 @@ export default class BackendService implements BackendServiceInterface {
         })
       }
 
+      result.portfolio.smallestThisMonthProfitability = smallest(productsStatistics, (product) => product.inTheMonth.portfolioProfitability)
+      result.portfolio.largestThisMonthProfitability = largest(productsStatistics, (product) => product.inTheMonth.portfolioProfitability)
+      result.portfolio.smallestLast12Profitability = smallest(productsStatistics, (product) => product.inTwelveMonths.portfolioProfitability)
+      result.portfolio.largestLast12Profitability = largest(productsStatistics, (product) => product.inTwelveMonths.portfolioProfitability)
       result.portfolio.smallestPortfolioPercentage = smallest(result.products, (product) => product.portfolioPercentage)
       result.portfolio.largestPortfolioPercentage = largest(result.products, (product) => product.portfolioPercentage)
       result.portfolio.smallestRelativeProfitabilityThisMonth = smallest(result.products, (product) => product.relativeProfitabilityThisMonth)

@@ -5,9 +5,10 @@ import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
-import 'dayjs/locale/pt-br'
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import minMax from 'dayjs/plugin/minMax'
+import 'dayjs/locale/pt-br'
 
 import locales from './locales';
 
@@ -18,6 +19,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(isSameOrBefore)
 dayjs.extend(isSameOrAfter)
+dayjs.extend(minMax)
 dayjs.locale('pt-br')
 
 // Register new locales for numeral

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { BrowserWindow, ipcMain, Tray, screen } from "electron";
 import { platform } from "os";
 
@@ -129,7 +130,7 @@ export default class TrayWindow {
     return window;
   }
 
-  setWindowUrl(windowUrl: any) {
+  setWindowUrl(windowUrl: string) {
     this.window.loadURL(windowUrl);
   }
 

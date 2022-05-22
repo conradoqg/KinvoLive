@@ -41,10 +41,15 @@ export default class IPCController {
         for (const [invokeMethod, options] of invokedMethods) {
           this.loggerService.debug(`Listening invoke ${className}:${invokeMethod}`)
           ipcMain.handle(`${className}:${invokeMethod}`, async (_ipcMainEvent, ...args) => {
-            const calledAt = dayjs()
-            const result = Reflect.apply(controller[invokeMethod], controller, args)
-            if (options.log) this.loggerService.debug(`${className}:${invokeMethod} called and took ${humanize(dayjs.duration(dayjs().diff(calledAt, 'milliseconds')))}`)
-            return result
+            try {
+              const calledAt = dayjs()
+              const result = await Reflect.apply(controller[invokeMethod], controller, args)
+              if (options.log) this.loggerService.debug(`${className}:${invokeMethod} called and took ${humanize(dayjs.duration(dayjs().diff(calledAt, 'milliseconds')))}`)
+              return result
+            } catch (ex) {
+              this.loggerService.error(ex)
+              throw ex;
+            }
           })
         }
       }

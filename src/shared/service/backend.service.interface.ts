@@ -3,7 +3,7 @@ import { KinvoCredential, KinvoCredentialResponse, Portfolios, PortfolioSummary 
 export default interface BackendServiceInterface {
   getPortfolios(): Promise<Portfolios>
 
-  getPortfolioSummary(portfolioId: number): Promise<PortfolioSummary>
+  getPortfolioSummary(portfolioId: number, referenceMonth: Date): Promise<PortfolioSummary>
 
   login(credential: KinvoCredential, store: boolean): Promise<boolean>
 

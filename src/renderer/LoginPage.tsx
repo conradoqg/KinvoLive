@@ -7,6 +7,12 @@ import { useAuth } from "./auth.provider";
 import icon from '../../assets/icon.png';
 import Alert from "./components/Alert";
 
+type LocationState = {
+  from?: {
+    pathname: string | null;
+  }
+}
+
 export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string>(null)
   const [errorFields, setErrorFields] = useState<{ [key: string]: string }>({ email: ' ', password: ' ' })
@@ -15,8 +21,7 @@ export default function LoginPage() {
   const location = useLocation();
   const auth = useAuth();
 
-  const state: any = location.state as any
-  const from = state.from?.pathname || "/";
+  const from = (location.state as LocationState)?.from?.pathname || '/';
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
