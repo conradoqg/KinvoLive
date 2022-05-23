@@ -1,6 +1,6 @@
 {
   "name": "kinvo-live",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Informações sobre o seu portifólio de bandeja",
   "main": "./dist/main/main.js",
   "author": {
