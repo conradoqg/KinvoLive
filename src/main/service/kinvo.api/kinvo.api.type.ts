@@ -222,13 +222,13 @@ export interface Profitability {
 }
 
 export interface MonthlyProfitability {
-    fromBeginning: MonthClass;
-    inTheYear:     MonthClass;
-    months:        MonthClass[];
+    fromBeginning: FromBeginningClass;
+    inTheYear:     FromBeginningClass;
+    months:        FromBeginningClass[];
     year:          number;
 }
 
-export interface MonthClass {
+export interface FromBeginningClass {
     epochMonthlyReferenceDate?: number;
     indexer:                    number;
     profitability:              number;
@@ -262,14 +262,14 @@ export interface PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeR
     equity:                               number;
     financialInstitutionId:               number;
     financialInstitutionName:             string;
-    fromBeginning:                        InSixMonthsClass;
-    inSixMonths:                          InSixMonthsClass;
-    inTheMonth:                           InSixMonthsClass;
-    inThePeriod:                          InSixMonthsClass;
-    inTheYear:                            InSixMonthsClass;
-    inThreeMonths:                        InSixMonthsClass;
-    inTwelveMonths:                       InSixMonthsClass;
-    inTwentyfourMonths:                   InSixMonthsClass;
+    fromBeginning:                        FromBeginning | null;
+    inSixMonths:                          FromBeginning | null;
+    inTheMonth:                           FromBeginning | null;
+    inThePeriod:                          FromBeginning | null;
+    inTheYear:                            FromBeginning | null;
+    inThreeMonths:                        FromBeginning | null;
+    inTwelveMonths:                       FromBeginning | null;
+    inTwentyfourMonths:                   FromBeginning | null;
     portfolioProductId:                   number;
     productName:                          string;
     productTypeId:                        number;
@@ -277,7 +277,7 @@ export interface PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeR
     strategyOfDiversificationId:          number;
 }
 
-export interface InSixMonthsClass {
+export interface FromBeginning {
     firstSerieProfitability: number;
     portfolioProfitability:  number;
 }
@@ -557,12 +557,12 @@ export class Convert {
         return uncast(value, r("MonthlyProfitability"));
     }
 
-    public static toMonthClass(json: any): MonthClass {
-        return cast(json, r("MonthClass"));
+    public static toFromBeginningClass(json: any): FromBeginningClass {
+        return cast(json, r("FromBeginningClass"));
     }
 
-    public static monthClassToJson(value: MonthClass): any {
-        return uncast(value, r("MonthClass"));
+    public static fromBeginningClassToJson(value: FromBeginningClass): any {
+        return uncast(value, r("FromBeginningClass"));
     }
 
     public static toStatisticsSummaryMonthly(json: any): StatisticsSummaryMonthly {
@@ -597,12 +597,12 @@ export class Convert {
         return uncast(value, r("PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponseDatum"));
     }
 
-    public static toInSixMonthsClass(json: any): InSixMonthsClass {
-        return cast(json, r("InSixMonthsClass"));
+    public static toFromBeginning(json: any): FromBeginning {
+        return cast(json, r("FromBeginning"));
     }
 
-    public static inSixMonthsClassToJson(value: InSixMonthsClass): any {
-        return uncast(value, r("InSixMonthsClass"));
+    public static fromBeginningToJson(value: FromBeginning): any {
+        return uncast(value, r("FromBeginning"));
     }
 
     public static toPortfolioQueryProductConsolidationGetProductsResponse(json: any): PortfolioQueryProductConsolidationGetProductsResponse {
@@ -932,12 +932,12 @@ const typeMap: any = {
         { json: "thirdSerieProfitability", js: "thirdSerieProfitability", typ: 3.14 },
     ], false),
     "MonthlyProfitability": o([
-        { json: "fromBeginning", js: "fromBeginning", typ: r("MonthClass") },
-        { json: "inTheYear", js: "inTheYear", typ: r("MonthClass") },
-        { json: "months", js: "months", typ: a(r("MonthClass")) },
+        { json: "fromBeginning", js: "fromBeginning", typ: r("FromBeginningClass") },
+        { json: "inTheYear", js: "inTheYear", typ: r("FromBeginningClass") },
+        { json: "months", js: "months", typ: a(r("FromBeginningClass")) },
         { json: "year", js: "year", typ: 0 },
     ], false),
-    "MonthClass": o([
+    "FromBeginningClass": o([
         { json: "epochMonthlyReferenceDate", js: "epochMonthlyReferenceDate", typ: u(undefined, 0) },
         { json: "indexer", js: "indexer", typ: 3.14 },
         { json: "profitability", js: "profitability", typ: 3.14 },
@@ -967,21 +967,21 @@ const typeMap: any = {
         { json: "equity", js: "equity", typ: 3.14 },
         { json: "financialInstitutionId", js: "financialInstitutionId", typ: 0 },
         { json: "financialInstitutionName", js: "financialInstitutionName", typ: "" },
-        { json: "fromBeginning", js: "fromBeginning", typ: r("InSixMonthsClass") },
-        { json: "inSixMonths", js: "inSixMonths", typ: r("InSixMonthsClass") },
-        { json: "inTheMonth", js: "inTheMonth", typ: r("InSixMonthsClass") },
-        { json: "inThePeriod", js: "inThePeriod", typ: r("InSixMonthsClass") },
-        { json: "inTheYear", js: "inTheYear", typ: r("InSixMonthsClass") },
-        { json: "inThreeMonths", js: "inThreeMonths", typ: r("InSixMonthsClass") },
-        { json: "inTwelveMonths", js: "inTwelveMonths", typ: r("InSixMonthsClass") },
-        { json: "inTwentyfourMonths", js: "inTwentyfourMonths", typ: r("InSixMonthsClass") },
+        { json: "fromBeginning", js: "fromBeginning", typ: u(r("FromBeginning"), null) },
+        { json: "inSixMonths", js: "inSixMonths", typ: u(r("FromBeginning"), null) },
+        { json: "inTheMonth", js: "inTheMonth", typ: u(r("FromBeginning"), null) },
+        { json: "inThePeriod", js: "inThePeriod", typ: u(r("FromBeginning"), null) },
+        { json: "inTheYear", js: "inTheYear", typ: u(r("FromBeginning"), null) },
+        { json: "inThreeMonths", js: "inThreeMonths", typ: u(r("FromBeginning"), null) },
+        { json: "inTwelveMonths", js: "inTwelveMonths", typ: u(r("FromBeginning"), null) },
+        { json: "inTwentyfourMonths", js: "inTwentyfourMonths", typ: u(r("FromBeginning"), null) },
         { json: "portfolioProductId", js: "portfolioProductId", typ: 0 },
         { json: "productName", js: "productName", typ: "" },
         { json: "productTypeId", js: "productTypeId", typ: 0 },
         { json: "strategyOfDiversificationDescription", js: "strategyOfDiversificationDescription", typ: "" },
         { json: "strategyOfDiversificationId", js: "strategyOfDiversificationId", typ: 0 },
     ], false),
-    "InSixMonthsClass": o([
+    "FromBeginning": o([
         { json: "firstSerieProfitability", js: "firstSerieProfitability", typ: 3.14 },
         { json: "portfolioProfitability", js: "portfolioProfitability", typ: 3.14 },
     ], false),

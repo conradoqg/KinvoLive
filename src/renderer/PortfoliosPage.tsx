@@ -43,6 +43,7 @@ export default function PortfoliosPage() {
         setPortfolios(newPortfolios)
       } catch (ex) {
         setErrorMessage(ex.message)
+        setLoadingPortfolioSummary(false)
       }
     };
 

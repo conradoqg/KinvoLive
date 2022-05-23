@@ -55,28 +55,84 @@
                     "type": "string"
                 },
                 "inTheMonth": {
-                    "$ref": "#/definitions/FromBeginning"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FromBeginning"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 },
                 "inTheYear": {
-                    "$ref": "#/definitions/FromBeginning"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FromBeginning"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 },
                 "inThePeriod": {
-                    "$ref": "#/definitions/FromBeginning"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FromBeginning"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 },
                 "inThreeMonths": {
-                    "$ref": "#/definitions/FromBeginning"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FromBeginning"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 },
                 "inSixMonths": {
-                    "$ref": "#/definitions/FromBeginning"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FromBeginning"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 },
                 "inTwelveMonths": {
-                    "$ref": "#/definitions/FromBeginning"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FromBeginning"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 },
                 "inTwentyfourMonths": {
-                    "$ref": "#/definitions/FromBeginning"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FromBeginning"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 },
                 "fromBeginning": {
-                    "$ref": "#/definitions/FromBeginning"
+                    "anyOf": [
+                        {
+                            "$ref": "#/definitions/FromBeginning"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
                 }
             },
             "required": [

@@ -204,18 +204,18 @@ export default class BackendService implements BackendServiceInterface {
             productFinantialInstitutionId: productProfitability.financialInstitutionId,
             productFinantialInstitutionName: productProfitability.financialInstitutionName,
             portfolioPercentage,
-            profitabilityThisMonth: productProfitability.inTheMonth.portfolioProfitability,
-            profitabilityLast12Months: productProfitability.inTwelveMonths.portfolioProfitability,
-            relativeProfitabilityThisMonth: (productProfitability.inTheMonth.portfolioProfitability / 100) * portfolioPercentage,
-            relativeProfitabilityLast12Months: (productProfitability.inTwelveMonths.portfolioProfitability / 100) * portfolioPercentage
+            profitabilityThisMonth: productProfitability.inTheMonth && productProfitability.inTheMonth.portfolioProfitability,
+            profitabilityLast12Months: productProfitability.inTwelveMonths && productProfitability.inTwelveMonths.portfolioProfitability,
+            relativeProfitabilityThisMonth: productProfitability.inTheMonth && ((productProfitability.inTheMonth.portfolioProfitability / 100) * portfolioPercentage),
+            relativeProfitabilityLast12Months: productProfitability.inTwelveMonths && ((productProfitability.inTwelveMonths.portfolioProfitability / 100) * portfolioPercentage)
           }
         })
       }
 
-      result.portfolio.smallestThisMonthProfitability = smallest(productsStatistics, (product) => product.inTheMonth.portfolioProfitability)
-      result.portfolio.largestThisMonthProfitability = largest(productsStatistics, (product) => product.inTheMonth.portfolioProfitability)
-      result.portfolio.smallestLast12Profitability = smallest(productsStatistics, (product) => product.inTwelveMonths.portfolioProfitability)
-      result.portfolio.largestLast12Profitability = largest(productsStatistics, (product) => product.inTwelveMonths.portfolioProfitability)
+      result.portfolio.smallestThisMonthProfitability = smallest(result.products, (product) => product.profitabilityThisMonth)
+      result.portfolio.largestThisMonthProfitability = largest(result.products, (product) => product.profitabilityThisMonth)
+      result.portfolio.smallestLast12Profitability = smallest(result.products, (product) => product.profitabilityLast12Months)
+      result.portfolio.largestLast12Profitability = largest(result.products, (product) => product.profitabilityLast12Months)
       result.portfolio.smallestPortfolioPercentage = smallest(result.products, (product) => product.portfolioPercentage)
       result.portfolio.largestPortfolioPercentage = largest(result.products, (product) => product.portfolioPercentage)
       result.portfolio.smallestRelativeProfitabilityThisMonth = smallest(result.products, (product) => product.relativeProfitabilityThisMonth)
