@@ -14,7 +14,7 @@ import App from "../interface/app";
 import { humanize } from "../../shared/helpers/dayjs";
 
 @Component()
-@IPCController()
+@IPCController({ name: 'BackendService' })
 export default class BackendService implements BackendServiceInterface {
   @Inject()
   private loggerService: LoggerService

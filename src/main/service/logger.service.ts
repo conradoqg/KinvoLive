@@ -11,7 +11,7 @@ import { IPCController, IPCEvent } from "../controller/ipc.decorator";
 import ConfigService from "./config.service";
 
 @Component()
-@IPCController()
+@IPCController({ name: 'LoggerService' })
 export default class LoggerService implements LoggerServiceInterface {
   public LOG_PATH: string
 

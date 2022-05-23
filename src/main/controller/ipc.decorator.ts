@@ -1,6 +1,6 @@
-export const IPCController = (): ClassDecorator => {
+export const IPCController = (options: { name: string }): ClassDecorator => {
   return target => {
-    return Reflect.defineMetadata('ipc-controller:isController', true, target.prototype)
+    return Reflect.defineMetadata('ipc-controller:controllerName', options, target.prototype)
   }
 }
 
