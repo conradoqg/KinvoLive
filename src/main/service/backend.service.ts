@@ -261,7 +261,15 @@ export default class BackendService implements BackendServiceInterface {
 
   @IPCInvoke()
   getCredential(): Promise<KinvoCredentialResponse> {
-    return Promise.resolve<KinvoCredentialResponse>({ email: this.kinvoAPIService.credential.email })
+    const { credential } = this.kinvoAPIService
+
+    if (credential) {
+      return Promise.resolve<KinvoCredentialResponse>({
+        email: credential.email
+      })
+    }
+
+    return null
   }
 
   @IPCInvoke()
