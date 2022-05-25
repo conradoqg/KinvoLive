@@ -143,13 +143,8 @@ export default class App {
       await this.createTray()
       await this.createWindow()
       await this.createTrayWindow()
-      app.on('activate', () => {
-        if (app.dock) app.dock.hide()
 
-        // On macOS it's common to re-create a window in the app when the
-        // dock icon is clicked and there are no other windows open.
-        if (this.mainWindow === null) this.createWindow();
-      });
+      if (app.dock) app.dock.hide()
     } catch (ex) {
       this.loggerService.error(ex)
     }
