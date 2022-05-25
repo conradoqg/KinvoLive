@@ -32,6 +32,7 @@ export default function PortfoliosPage() {
   const [sortOptions, setSortOptions] = useState<SortOptions>({ field: 'relativeProfitabilityThisMonth', order: 1 })
   const [errorMessage, setErrorMessage] = useState<string>(null)
   const [valueType, setValueType] = useState<string>('proportional')
+  // TODO: Split loading variables
   const [loadingPortfolioSummary, setLoadingPortfolioSummary] = useState<boolean>(true)
 
   useEffect(() => {
@@ -174,7 +175,7 @@ export default function PortfoliosPage() {
             <ButtonGroup variant="contained" aria-label="outlined primary button group">
               <LoadingButton onClick={() => handleMonthChange(-1)} size="small" loading={loadingPortfolioSummary} variant="contained" disabled={dayjs().subtract(2, 'months').isSameOrAfter(selectedMonth, 'month')}><KeyboardArrowLeftIcon /></LoadingButton>
               <Typography alignSelf='center' sx={{ marginLeft: 3, marginRight: 3 }}>{loadingPortfolioSummary ? <Skeleton width={50} /> : (portfolioSummary && capitalizeFirstLetter(dayjs(portfolioSummary.portfolio.monthReference).format('MMM - YY')))}</Typography>
-              <LoadingButton onClick={() => handleMonthChange(1)} size="small" loading={loadingPortfolioSummary} variant="contained" disabled={dayjs().isSameOrBefore(selectedMonth, 'month')}> <KeyboardArrowRightIcon /></LoadingButton>
+              <LoadingButton onClick={() => handleMonthChange(1)} size="small" loading={loadingPortfolioSummary} variant="contained" disabled={!selectedMonth || dayjs().isSameOrBefore(selectedMonth, 'month')}> <KeyboardArrowRightIcon /></LoadingButton>
             </ButtonGroup>
           </Grid>
           <Grid item xs={false}>

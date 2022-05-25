@@ -13,6 +13,16 @@ import { KinvoCredential, KinvoCredentialResponse, Portfolios, PortfolioSummary,
 import App from "../interface/app";
 import { humanize } from "../../shared/helpers/dayjs";
 
+class BackendServiceError extends Error {
+  cause: Error
+
+  constructor(message: string, cause?: Error) {
+    super(message);
+    this.name = BackendServiceError.name;
+    this.cause = cause
+  }
+}
+
 @Component()
 @IPCController({ name: 'BackendService' })
 export default class BackendService implements BackendServiceInterface {
@@ -37,28 +47,9 @@ export default class BackendService implements BackendServiceInterface {
     }
   } = {}
 
-  private consolidate(portfolioId: number) {
-    if (!this.lastConsolidation || dayjs().diff(this.lastConsolidation, 'minutes') > 120) {
-      this.loggerService.debug('Requesting consolidation...')
-      if (this.configService.mockData) {
-        return Promise.resolve({
-          consolidationRoute: 'QUEUED'
-        } as PortfolioConsolidateResponseData)
-      }
-      this.lastConsolidation = dayjs()
-      this.loggerService.debug('Requesting consolidation done.')
-    } else {
-      this.loggerService.debug(`Not consolidating, last was ${humanize(dayjs.duration(dayjs().diff(this.lastConsolidation, 'milliseconds')))} ago`)
-    }
-
-    return this.kinvoAPIService.postPortfolioConsolidate({
-      ignoreCache: false,
-      portfolioId
-    })
-  }
 
   @IPCInvoke()
-  getPortfolios(): Promise<Portfolios> {
+  async getPortfolios(): Promise<Portfolios> {
     if (this.configService.mockData) {
       return Promise.resolve<Portfolios>([{
         id: 1,
@@ -75,9 +66,9 @@ export default class BackendService implements BackendServiceInterface {
     }
 
     try {
-      return this.kinvoAPIService.getPortfolioCommandPortfolioGetPortfolios() as Promise<Portfolios>;
+      return (await this.kinvoAPIService.getPortfolioCommandPortfolioGetPortfolios()) as Portfolios;
     } catch (ex) {
-      throw new Error(ex.response ? ex.response.data.error.message : ex.message)
+      throw new BackendServiceError('Não foi possível recuperar a lista de portifólios', ex)
     }
   }
 
@@ -225,9 +216,30 @@ export default class BackendService implements BackendServiceInterface {
 
       return result
     } catch (ex) {
-      throw new Error(ex.response ? ex.response.data.error.message : ex.message)
+      throw new BackendServiceError('Não foi possível recuperar os produtos do portifólio', ex)
     }
   }
+
+  private consolidate(portfolioId: number) {
+    if (!this.lastConsolidation || dayjs().diff(this.lastConsolidation, 'minutes') > 120) {
+      this.loggerService.debug('Requesting consolidation...')
+      if (this.configService.mockData) {
+        return Promise.resolve({
+          consolidationRoute: 'QUEUED'
+        } as PortfolioConsolidateResponseData)
+      }
+      this.lastConsolidation = dayjs()
+      this.loggerService.debug('Requesting consolidation done.')
+    } else {
+      this.loggerService.debug(`Not consolidating, last was ${humanize(dayjs.duration(dayjs().diff(this.lastConsolidation, 'milliseconds')))} ago`)
+    }
+
+    return this.kinvoAPIService.postPortfolioConsolidate({
+      ignoreCache: false,
+      portfolioId
+    })
+  }
+
 
   private hydrateNewValuesData(portfolio: PortfolioQueryPortfolioConsolidationGetPortfolioResponseData, portfolioId: number) {
     const now = dayjs();
@@ -247,6 +259,23 @@ export default class BackendService implements BackendServiceInterface {
   }
 
   @IPCInvoke()
+  getCredential(): Promise<KinvoCredentialResponse> {
+    try {
+      const { credential } = this.kinvoAPIService
+
+      if (credential) {
+        return Promise.resolve<KinvoCredentialResponse>({
+          email: credential.email
+        })
+      }
+
+      return null
+    } catch (ex) {
+      throw new BackendServiceError('Não foi possível recuperar a credencial armazenada', ex)
+    }
+  }
+
+  @IPCInvoke()
   async login(credential: KinvoCredential, store = false): Promise<boolean> {
     try {
       this.loggerService.debug('Logining in')
@@ -255,25 +284,16 @@ export default class BackendService implements BackendServiceInterface {
       return true
     } catch (ex) {
       this.loggerService.warn('Logging failed')
-      throw new Error(ex.response ? ex.response.data.error.message : ex.message)
+      throw new BackendServiceError(ex.response ? ex.response.data.error.message : 'Não foi possível se autenticar', ex)
     }
-  }
-
-  @IPCInvoke()
-  getCredential(): Promise<KinvoCredentialResponse> {
-    const { credential } = this.kinvoAPIService
-
-    if (credential) {
-      return Promise.resolve<KinvoCredentialResponse>({
-        email: credential.email
-      })
-    }
-
-    return null
   }
 
   @IPCInvoke()
   async logout() {
-    this.kinvoAPIService.logout()
+    try {
+      this.kinvoAPIService.logout()
+    } catch (ex) {
+      throw new BackendServiceError('Não foi possível desconectar')
+    }
   }
 }

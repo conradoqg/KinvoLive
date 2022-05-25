@@ -8,8 +8,10 @@ const InvokeError = Error;
 
 class BackendService implements BackendServiceInterface {
   private static parseErrorMessage(ex): string {
-    const myRegexp = /^Error invoking remote method '[a-zA-Z0-9]+': Error: (.*)/g;
+    const myRegexp = /^Error invoking remote method '[a-zA-Z0-9:]+': [a-zA-Z0-9]+Error: (.*)/g;
     const match = myRegexp.exec(ex.message);
+
+    if (match.length < 2) return 'Erro desconhecido'
     return match[1]
   }
 
@@ -46,7 +48,11 @@ class BackendService implements BackendServiceInterface {
   }
 
   async logout() {
-    return ipcRenderer.invoke<void>('BackendService:logout')
+    try {
+      return await ipcRenderer.invoke<void>('BackendService:logout')
+    } catch (ex) {
+      throw new InvokeError(BackendService.parseErrorMessage(ex))
+    }
   }
 }
 
