@@ -157,10 +157,10 @@ export default class App {
 
   public notify() {
     if (this.mainWindow && this.mainTray && !this.mainWindow.isVisible()) {
-      this.mainTray.setImage(this.resources.trayIconDefault)
+      this.mainTray.setImage(this.resources.trayIconNotify)
 
       ipcMain.once('tray-window-visible', () => {
-        this.mainTray.setImage(this.resources.trayIconNotify)
+        this.mainTray.setImage(this.resources.trayIconDefault)
       })
     }
   }
