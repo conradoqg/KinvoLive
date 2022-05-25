@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-import { BrowserWindow, ipcMain, Tray, screen } from "electron";
-import { platform } from "os";
+import { BrowserWindow, ipcMain, Tray, screen, Menu } from "electron";
+import LoggerService from "main/service/logger.service";
 
 type Options = {
   tray?: Tray;
@@ -12,6 +12,8 @@ type Options = {
   margin_x?: number;
   margin_y?: number;
   framed?: boolean;
+  menu: Menu;
+  loggerService: LoggerService;
 }
 
 export default class TrayWindow {
@@ -65,10 +67,29 @@ export default class TrayWindow {
     if (options.window) this.setWindow(options.window)
     else this.createWindow(options.windowUrl);
 
-    this.tray.on("click", () => {
-      ipcMain.emit("tray-window-clicked", { window: this.window, tray: this.tray });
-      this.toggleWindow();
-    });
+    this.tray.on('click', () => options.loggerService && options.loggerService.silly('click'))
+    this.tray.on('double-click', () => options.loggerService && options.loggerService.silly('double-click'))
+    this.tray.on('right-click', () => options.loggerService && options.loggerService.silly('right-click'))
+    this.tray.on('mouse-down', () => options.loggerService && options.loggerService.silly('mouse-down'))
+    this.tray.on('mouse-up', () => options.loggerService && options.loggerService.silly('mouse-up'))
+
+    if (process.platform === 'linux') {
+      this.tray.setContextMenu(options.menu)
+    } else {
+      this.tray.on("click", () => {
+        ipcMain.emit("tray-window-clicked", { window: this.window, tray: this.tray });
+        this.toggleWindow();
+      });
+      this.tray.on('right-click', () => {
+        this.tray.popUpContextMenu(options.menu)
+      })
+    }
+    /*
+    click, double-click, right-click, mouse-down, mouse-up
+    Windows:
+      With setContextMenu -> click, double-click, -           , - , -
+      No setContextMenu   -> click, double-click, right-click , - , -
+    */
 
     this.setWindowAutoHide();
     this.alignWindow();
@@ -181,7 +202,7 @@ export default class TrayWindow {
     let referenceY = null
     let referenceWidth = null
     let referenceHeight = null
-    if (platform() === 'linux') {
+    if (process.platform === 'linux') {
       const mouseBounds = screen.getCursorScreenPoint()
       referenceX = mouseBounds.x
       referenceY = mouseBounds.y

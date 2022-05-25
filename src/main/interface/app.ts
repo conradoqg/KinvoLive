@@ -1,10 +1,10 @@
 /* eslint-disable global-require */
-import path from 'path';
 import { app, BrowserWindow, shell, Tray, Menu, ipcMain } from 'electron';
 import { Component, Initialize, Inject } from 'tsdi';
 import TrayWindow from './trayWindow';
 import LoggerService from '../service/logger.service';
 import ConfigService from '../service/config.service';
+import Resources from './resources';
 
 @Component()
 export default class App {
@@ -14,15 +14,14 @@ export default class App {
 
   private trayWindow: TrayWindow | null = null;
 
-  private RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../../assets');
-
   @Inject()
   private loggerService: LoggerService
 
   @Inject()
   private configService: ConfigService
+
+  @Inject()
+  private resources: Resources
 
   private async installExtensions() {
     const installer = require('electron-devtools-installer');
@@ -37,37 +36,36 @@ export default class App {
       .catch(this.loggerService.error);
   };
 
-  private getAssetPath(...paths: string[]): string {
-    return path.join(this.RESOURCES_PATH, ...paths);
-  };
-
   private async createTray() {
     if (!this.configService.isDebug || this.configService.forceTray) {
-      this.mainTray = new Tray(this.getAssetPath('icon.png'))
-      const contextMenu = Menu.buildFromTemplate([
-        {
-          label: 'Abrir', type: 'normal', click: () => {
-            this.trayWindow.toggleWindow()
-          },
-        },
-        { type: 'separator' },
-        {
-          label: 'Sair', type: 'normal', click: () => {
-            this.mainWindow.destroy();
-            this.mainTray.destroy();
-            app.quit();
-          }
-        }
-      ])
-      this.mainTray.setContextMenu(contextMenu)
+      this.mainTray = new Tray(this.resources.trayIconDefault)
+      this.mainTray.setIgnoreDoubleClickEvents(true)
     }
   }
 
   private async createTrayWindow() {
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Abrir', type: 'normal', click: () => {
+          this.trayWindow.toggleWindow()
+        },
+      },
+      { type: 'separator' },
+      {
+        label: 'Sair', type: 'normal', click: () => {
+          this.mainWindow.destroy();
+          this.mainTray.destroy();
+          app.quit();
+        }
+      }
+    ])
+
     if (!this.configService.isDebug || this.configService.forceTray) {
       this.trayWindow = new TrayWindow({
         window: this.mainWindow,
         tray: this.mainTray,
+        menu: contextMenu,
+        loggerService: this.loggerService
       })
     }
   }
@@ -81,18 +79,16 @@ export default class App {
       show: false,
       width: 530,
       height: 600,
-      icon: this.getAssetPath('icon.png'),
+      icon: this.resources.windowIcon,
       frame: this.configService.isDebug,
       skipTaskbar: !this.configService.isDebug,
       alwaysOnTop: !this.configService.isDebug,
       webPreferences: {
-        preload: app.isPackaged
-          ? path.join(__dirname, 'preload.js')
-          : path.join(__dirname, '../../../.erb/dll/preload.js'),
+        preload: this.resources.preloadScript
       },
     });
 
-    this.mainWindow.loadURL(this.resolveHtmlPath('index.html'));
+    this.mainWindow.loadURL(this.resources.index);
 
     if (this.configService.isDebug && !this.configService.forceTray) {
       this.mainWindow.on('ready-to-show', () => {
@@ -121,17 +117,6 @@ export default class App {
 
   };
 
-  private resolveHtmlPath(htmlFileName: string): string {
-    if (this.configService.isDebug) {
-      const port = process.env.PORT || 1212;
-      const url = new URL(`http://localhost:${port}`);
-      url.pathname = htmlFileName;
-      return url.href;
-    }
-
-    return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
-  }
-
   @Initialize
   public async init() {
     if (this.configService.isProduction) {
@@ -159,6 +144,8 @@ export default class App {
       await this.createWindow()
       await this.createTrayWindow()
       app.on('activate', () => {
+        if (app.dock) app.dock.hide()
+
         // On macOS it's common to re-create a window in the app when the
         // dock icon is clicked and there are no other windows open.
         if (this.mainWindow === null) this.createWindow();
@@ -170,10 +157,10 @@ export default class App {
 
   public notify() {
     if (this.mainWindow && this.mainTray && !this.mainWindow.isVisible()) {
-      this.mainTray.setImage(this.getAssetPath('icon-notify.png'))
+      this.mainTray.setImage(this.resources.trayIconDefault)
 
       ipcMain.once('tray-window-visible', () => {
-        this.mainTray.setImage(this.getAssetPath('icon.png'))
+        this.mainTray.setImage(this.resources.trayIconNotify)
       })
     }
   }
