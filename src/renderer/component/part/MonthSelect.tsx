@@ -1,6 +1,6 @@
 import { LoadingButton } from "@mui/lab";
 import { ButtonGroup, Skeleton, Typography } from "@mui/material";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import { capitalizeFirstLetter } from "shared/helpers/string";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';

@@ -1,7 +1,7 @@
 {
   "name": "kinvo-live",
   "description": "Informações sobre o seu portifólio de bandeja",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "scripts": {
     "build": "concurrently \"npm run build:main\" \"npm run build:renderer\"",
     "build:main": "cross-env NODE_ENV=production TS_NODE_TRANSPILE_ONLY=true webpack --config ./.erb/configs/webpack.config.main.prod.ts",
@@ -141,6 +141,7 @@
     ]
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.1.0",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.5",
     "@teamsupercell/typings-for-css-modules-loader": "^2.5.1",
     "@testing-library/jest-dom": "^5.16.4",
@@ -228,9 +229,11 @@
     "electron-store": "^8.0.1",
     "electron-updater": "^4.6.5",
     "history": "^5.3.0",
+    "material-ui-popup-state": "^3.1.1",
     "numeral": "^2.0.6",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-generate-context": "^2.0.0",
     "react-router-dom": "^6.3.0",
     "reflect-metadata": "^0.1.13",
     "source-map-support": "^0.5.21",

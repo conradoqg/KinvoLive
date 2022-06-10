@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { Box, Button, Checkbox, ClickAwayListener, Divider, Grid, GridSize, IconButton, Link, ListItemIcon, MenuItem, MenuList, Paper, Popper, Skeleton, Snackbar, Tooltip, Typography, useTheme } from '@mui/material';
+import { Box, Checkbox, ClickAwayListener, Divider, Grid, GridSize, Link, ListItemIcon, MenuItem, MenuList, Paper, Popper, Skeleton, Snackbar, Tooltip, Typography, useTheme } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Portfolios, PortfolioSummary, PortfolioSummaryProduct, PortfolioSummaryRangedValue, ranges } from 'shared/type/backend.types';
 import React, { useEffect, useState } from 'react';
