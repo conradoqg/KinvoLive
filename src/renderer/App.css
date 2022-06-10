@@ -3,5 +3,5 @@
  *        See https://github.com/webpack-contrib/sass-loader#imports
  */
 body {
-  background: rgb(238, 242, 244)
+  overflow: hidden;
 }

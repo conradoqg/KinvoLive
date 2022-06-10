@@ -84,12 +84,6 @@ export default class TrayWindow {
         this.tray.popUpContextMenu(options.menu)
       })
     }
-    /*
-    click, double-click, right-click, mouse-down, mouse-up
-    Windows:
-      With setContextMenu -> click, double-click, -           , - , -
-      No setContextMenu   -> click, double-click, right-click , - , -
-    */
 
     this.setWindowAutoHide();
     this.alignWindow();
@@ -183,8 +177,8 @@ export default class TrayWindow {
   alignWindow() {
     const position = this.calculateWindowPosition();
     this.window.setBounds({
-      width: this.width,
-      height: this.height,
+      width: this.window.getBounds().width,
+      height: this.window.getBounds().height,
       x: position.x,
       y: position.y
     });
@@ -235,7 +229,7 @@ export default class TrayWindow {
 
       case 2: // for TOP - RIGHT
         x = Math.floor(
-          referenceX - this.width - DEFAULT_MARGIN.x + referenceWidth / 2
+          referenceX - this.window.getBounds().width - DEFAULT_MARGIN.x + referenceWidth / 2
         );
         y = Math.floor(referenceY + DEFAULT_MARGIN.y + referenceHeight / 2);
         break;
@@ -244,16 +238,16 @@ export default class TrayWindow {
       case 3: // for BOTTOM - LEFT
         x = Math.floor(referenceX + DEFAULT_MARGIN.x + referenceWidth / 2);
         y = Math.floor(
-          referenceY - this.height - DEFAULT_MARGIN.y + referenceHeight / 2
+          referenceY - this.window.getBounds().height - DEFAULT_MARGIN.y + referenceHeight / 2
         );
         break;
 
       case 4: // for BOTTOM - RIGHT
         x = Math.floor(
-          referenceX - this.width - DEFAULT_MARGIN.x + referenceWidth / 2
+          referenceX - this.window.getBounds().width - DEFAULT_MARGIN.x + referenceWidth / 2
         );
         y = Math.floor(
-          referenceY - this.height - DEFAULT_MARGIN.y + referenceHeight / 2
+          referenceY - this.window.getBounds().height - DEFAULT_MARGIN.y + referenceHeight / 2
         );
         break;
     }

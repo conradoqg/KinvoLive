@@ -2,9 +2,9 @@ import { Backdrop, Box, CircularProgress, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import React, { useEffect } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import pkg from '../../package.json'
-import backendService from './service/backend.service';
-import loggerService from './service/logger.service';
+import pkg from '../../../package.json'
+import backendService from '../service/backend.service';
+import loggerService from '../service/logger.service';
 
 // TODO: Centralize
 const UPDATE_INTERVAL = dayjs.duration(5, 'minute').asMilliseconds()
@@ -70,12 +70,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   return <AuthContext.Provider value={value}> {children} </AuthContext.Provider>;
 }
 
-export function useAuth() {
+export function useAuthContext() {
   return React.useContext(AuthContext);
 }
 
 export function RequireAuth({ children }: { children: JSX.Element }) {
-  const auth = useAuth();
+  const auth = useAuthContext();
   const location = useLocation();
 
   loggerService.debug(`Is auth ready? ${auth.ready}`)
@@ -95,7 +95,7 @@ export function RequireAuth({ children }: { children: JSX.Element }) {
 
 
 export function AuthStatus() {
-  const auth = useAuth();
+  const auth = useAuthContext();
   const navigate = useNavigate();
 
   const handleOpenLogClick = () => {

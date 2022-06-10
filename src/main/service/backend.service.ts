@@ -2,14 +2,18 @@ import { Component, Inject } from "tsdi";
 import { v5 as uuidv5 } from 'uuid';
 import dayjs, { Dayjs } from "dayjs";
 import BackendServiceInterface from "shared/service/backend.service.interface";
-import { largest, randomFloatFromInterval, smallest } from "../../shared/helpers/math";
+import { faker } from '@faker-js/faker';
+import { PreferenceData } from "shared/type/preference.type";
+import PreferenceStore from "../store/preference.store";
+import EnumHelpers from "../../shared/helpers/enum";
+import { compoundConvertion, largest, smallest } from "../../shared/helpers/math";
 import { delay } from "../../shared/helpers/promise";
 import ConfigService from "./config.service";
 import { IPCController, IPCInvoke } from "../controller/ipc.decorator";
 import KinvoAPIService from "./kinvo.api/kinvo.api.service";
 import { PortfolioConsolidateResponseData, PortfolioQueryPortfolioConsolidationGetPortfolioResponseData } from "./kinvo.api/kinvo.api.type";
 import LoggerService from "./logger.service";
-import { KinvoCredential, KinvoCredentialResponse, Portfolios, PortfolioSummary, ProductTypeId } from "../../shared/type/backend.types";
+import { KinvoCredential, KinvoCredentialResponse, Portfolios, PortfolioSummary, PortfolioSummaryDynamicValues, PortfolioSummaryProduct, PortfolioSummaryProducts, PortfolioSummaryRangedValue, PortfolioSummaryRangedValues, PortfolioSummaryRanges, ProductTypeId } from "../../shared/type/backend.types";
 import App from "../interface/app";
 import { humanize } from "../../shared/helpers/dayjs";
 
@@ -34,6 +38,9 @@ export default class BackendService implements BackendServiceInterface {
 
   @Inject()
   private kinvoAPIService: KinvoAPIService
+
+  @Inject()
+  private preferenceStore: PreferenceStore
 
   @Inject()
   private app: App
@@ -75,38 +82,93 @@ export default class BackendService implements BackendServiceInterface {
   @IPCInvoke()
   async getPortfolioSummary(portfolioId: number, month?: Date): Promise<PortfolioSummary> {
     if (this.configService.mockData) {
-      return Promise.resolve<PortfolioSummary>({
-        portfolio: {
-          newValuesAt: dayjs().toDate(),
-          monthReference: dayjs().toDate(),
-          firstApplicationDate: dayjs().subtract(1, 'month').toDate(),
-          lastUpdateDate: dayjs().subtract(2, 'days').toDate(),
-          profitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
-          profitabilityLast12Months: randomFloatFromInterval(-5, 5, 2),
-          smallestThisMonthProfitability: randomFloatFromInterval(-5, 5, 2),
-          largestThisMonthProfitability: randomFloatFromInterval(-5, 5, 2),
-          smallestLast12Profitability: randomFloatFromInterval(-5, 5, 2),
-          largestLast12Profitability: randomFloatFromInterval(-5, 5, 2),
-          smallestPortfolioPercentage: randomFloatFromInterval(-5, 5, 2),
-          largestPortfolioPercentage: randomFloatFromInterval(-5, 5, 2),
-          smallestRelativeProfitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
-          largestRelativeProfitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
-          largestRelativeProfitabilityLast12Months: randomFloatFromInterval(-5, 5, 2),
-          smallestRelativeProfitabilityLast12Months: randomFloatFromInterval(-5, 5, 2),
-        },
-        products: [{
-          productId: 1,
-          productName: 'Exemplo produto 1',
-          productTypeId: ProductTypeId.BDR,
-          productFinantialInstitutionId: randomFloatFromInterval(-5, 5, 2),
-          productFinantialInstitutionName: 'Instituição 1',
-          portfolioPercentage: randomFloatFromInterval(-5, 5, 2),
-          profitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
-          profitabilityLast12Months: randomFloatFromInterval(-5, 5, 2),
-          relativeProfitabilityThisMonth: randomFloatFromInterval(-5, 5, 2),
-          relativeProfitabilityLast12Months: randomFloatFromInterval(-5, 5, 2)
-        }]
+      const randomRange = (): PortfolioSummaryRangedValue => ({
+        current: faker.datatype.number({ min: -0.5, max: 0.5, precision: 0.01 }),
+        smallest: faker.datatype.number({ min: -1, max: -0.5, precision: 0.01 }),
+        largest: faker.datatype.number({ min: 0.5, max: 1, precision: 0.01 })
       })
+
+      const portfoliosRange = Array(3).fill(null)
+      const productsRange = Array(30).fill(null)
+
+      const fakeFinantialInstitution = [
+        { id: 1, name: faker.company.companyName() },
+        { id: 2, name: faker.company.companyName() },
+        { id: 3, name: faker.company.companyName() },
+        { id: 4, name: faker.company.companyName() },
+        { id: 5, name: faker.company.companyName() },
+        { id: 6, name: faker.company.companyName() }
+      ]
+
+      const fakeStrategy = [
+        { id: 1, name: faker.company.catchPhraseAdjective() },
+        { id: 2, name: faker.company.catchPhraseAdjective() },
+        { id: 3, name: faker.company.catchPhraseAdjective() },
+        { id: 4, name: faker.company.catchPhraseAdjective() },
+        { id: 5, name: faker.company.catchPhraseAdjective() },
+        { id: 6, name: faker.company.catchPhraseAdjective() }
+      ]
+
+      const fakePortfoliosData: PortfolioSummary[] = portfoliosRange.map<PortfolioSummary>((_portfolioRange, portfolioIndex) => ({
+        portfolioId: portfolioIndex + 1,
+        newValuesAt: dayjs().toDate(),
+        monthReference: dayjs().toDate(),
+        firstApplicationDate: dayjs().subtract(1, 'month').toDate(),
+        lastUpdateDate: dayjs().subtract(2, 'days').toDate(),
+        portfolioPercentage: randomRange(),
+        inTheMonthAbsoluteProfitability: randomRange(),
+        inTheMonthRelativeProfitability: randomRange(),
+        inTheMonthAverageProfitability: randomRange(),
+        inThreeMonthsAbsoluteProfitability: randomRange(),
+        inThreeMonthsRelativeProfitability: randomRange(),
+        inThreeMonthsAverageProfitability: randomRange(),
+        inSixMonthsAbsoluteProfitability: randomRange(),
+        inSixMonthsRelativeProfitability: randomRange(),
+        inSixMonthsAverageProfitability: randomRange(),
+        inTwelveMonthsAbsoluteProfitability: randomRange(),
+        inTwelveMonthsRelativeProfitability: randomRange(),
+        inTwelveMonthsAverageProfitability: randomRange(),
+        inTwentyfourMonthsAbsoluteProfitability: randomRange(),
+        inTwentyfourMonthsRelativeProfitability: randomRange(),
+        inTwentyfourMonthsAverageProfitability: randomRange(),
+        inTheYearAbsoluteProfitability: randomRange(),
+        inTheYearRelativeProfitability: randomRange(),
+        inTheYearAverageProfitability: randomRange(),
+        fromBeginningAbsoluteProfitability: randomRange(),
+        fromBeginningRelativeProfitability: randomRange(),
+        fromBeginningAverageProfitability: randomRange(),
+        products: productsRange.map<PortfolioSummaryProduct>((_productRange, productIndex) => ({
+          productId: productIndex + 1,
+          productName: `Exemplo produtoooooooooooooooo ${productIndex + 1}`,
+          productTypeId: faker.helpers.arrayElement(EnumHelpers.getValues(ProductTypeId)),
+          productFinantialInstitution: faker.helpers.arrayElement(fakeFinantialInstitution),
+          productStrategy: faker.helpers.arrayElement(fakeStrategy),
+          portfolioPercentage: randomRange(),
+          inTheMonthAbsoluteProfitability: randomRange(),
+          inTheMonthRelativeProfitability: randomRange(),
+          inTheMonthAverageProfitability: randomRange(),
+          inThreeMonthsAbsoluteProfitability: randomRange(),
+          inThreeMonthsRelativeProfitability: randomRange(),
+          inThreeMonthsAverageProfitability: randomRange(),
+          inSixMonthsAbsoluteProfitability: randomRange(),
+          inSixMonthsRelativeProfitability: randomRange(),
+          inSixMonthsAverageProfitability: randomRange(),
+          inTwelveMonthsAbsoluteProfitability: randomRange(),
+          inTwelveMonthsRelativeProfitability: randomRange(),
+          inTwelveMonthsAverageProfitability: randomRange(),
+          inTwentyfourMonthsAbsoluteProfitability: randomRange(),
+          inTwentyfourMonthsRelativeProfitability: randomRange(),
+          inTwentyfourMonthsAverageProfitability: randomRange(),
+          inTheYearAbsoluteProfitability: randomRange(),
+          inTheYearRelativeProfitability: randomRange(),
+          inTheYearAverageProfitability: randomRange(),
+          fromBeginningAbsoluteProfitability: randomRange(),
+          fromBeginningRelativeProfitability: randomRange(),
+          fromBeginningAverageProfitability: randomRange()
+        }))
+      }))
+
+      return Promise.resolve(fakePortfoliosData.find(fakePortfolioData => fakePortfolioData.portfolioId === portfolioId))
     }
 
     try {
@@ -128,16 +190,11 @@ export default class BackendService implements BackendServiceInterface {
         trie += 1
       }
 
-      let monthReference = dayjs(portfolio.lastUpdateDate).utc(true)
+      let monthReference = dayjs(portfolio.lastUpdateDate)
 
       if (month) {
-        monthReference = dayjs.min(dayjs(month).utc().endOf('month').startOf('day'), monthReference)
+        monthReference = dayjs.min(dayjs(month).endOf('month').startOf('day'), monthReference)
       }
-
-      this.loggerService.debug(`firstApplicationDate: ${dayjs(portfolio.firstApplicationDate).utc(true).toISOString()}`)
-      this.loggerService.debug(`lastUpdateDate: ${dayjs(portfolio.lastUpdateDate).utc(true).toISOString()}`)
-      this.loggerService.debug(`monthReference: ${monthReference.toISOString()}`)
-      this.loggerService.debug(`month: ${month ? dayjs(month).toISOString() : 'undefined'}`)
 
       const [portfolioStatistics, productsStatistics] = await Promise.all([
         this.kinvoAPIService.postPortfolioQueryPortfolioStatisticsGetStatisticsByDate({
@@ -154,69 +211,169 @@ export default class BackendService implements BackendServiceInterface {
 
       this.hydrateNewValuesData(portfolio, portfolioId);
 
-      const totalEquity = productsStatistics.reduce((acc, productStatistic) => acc + productStatistic.equity, 0)
-
-      const parseEpoch = (epoch: number): Dayjs => dayjs(epoch * 1000).utc().tz('America/Sao_Paulo', true)
+      const parseEpoch = (epoch: number): Dayjs => dayjs.utc(epoch * 1000).tz('America/Sao_Paulo', true)
 
       const monthlyProfitability = portfolioStatistics.portfolioProfitability.monthlyProfitability.flatMap(item => item.months).sort((a, b) => a.epochMonthlyReferenceDate - b.epochMonthlyReferenceDate)
-      const monthlyProfitabilityBeforeReferenceDate = monthlyProfitability.filter(monthProfitability => parseEpoch(monthProfitability.epochMonthlyReferenceDate).isSameOrBefore(monthReference, 'month'))
+      const monthlyProfitabilityBeforeReferenceDate = monthlyProfitability.filter(monthProfitability => {
+        const monthlyReferenceDate = parseEpoch(monthProfitability.epochMonthlyReferenceDate)
+        return monthlyReferenceDate.isSameOrBefore(monthReference, 'month')
+      })
 
-      const thisMonth = monthlyProfitabilityBeforeReferenceDate.slice(-1)
-      const last12Months = monthlyProfitabilityBeforeReferenceDate.slice(-12)
+      const totalEquity = productsStatistics.reduce((acc, productStatistic) => acc + productStatistic.equity, 0)
 
-      const thisMonthProfitability = (thisMonth.reduce((acc, monthItem) => acc * (1 + (monthItem.profitability / 100)), 1) - 1) * 100
-      const last12MonthsProfitability = (last12Months.reduce((acc, monthItem) => acc * (1 + (monthItem.profitability / 100)), 1) - 1) * 100
+      // TODO: Fix
+      const ranges: PortfolioSummaryRanges = [{
+        byName: 'inTheMonth',
+        byMonths: 1
+      }, {
+        byName: 'inThreeMonths',
+        byMonths: 3
+      }, {
+        byName: 'inSixMonths',
+        byMonths: 6
+      }, {
+        byName: 'inTwelveMonths',
+        byMonths: 12
+      }, {
+        byName: 'inTwentyfourMonths',
+        byMonths: 24
+      }, {
+        byName: 'inTheYear',
+        byMonths: monthReference.month() + 1
+      }, {
+        byName: 'fromBeginning',
+        byMonths: monthlyProfitabilityBeforeReferenceDate.length
+      }]
 
-      const result: PortfolioSummary = {
-        portfolio: {
-          newValuesAt: this.portfoliosNewValuesData[portfolioId].newValuesAt.toDate(),
-          monthReference: monthReference.toDate(),
-          firstApplicationDate: dayjs(portfolio.firstApplicationDate).utc(true).toDate(),
-          lastUpdateDate: dayjs(portfolio.lastUpdateDate).utc(true).toDate(),
-          profitabilityThisMonth: thisMonthProfitability,
-          profitabilityLast12Months: last12MonthsProfitability,
-          smallestThisMonthProfitability: 0,
-          largestThisMonthProfitability: 0,
-          smallestLast12Profitability: 0,
-          largestLast12Profitability: 0,
-          smallestPortfolioPercentage: 0,
-          largestPortfolioPercentage: 0,
-          smallestRelativeProfitabilityThisMonth: 0,
-          largestRelativeProfitabilityThisMonth: 0,
-          smallestRelativeProfitabilityLast12Months: 0,
-          largestRelativeProfitabilityLast12Months: 0
-        },
-        products: productsStatistics.map(productProfitability => {
-          const portfolioPercentage = (productProfitability.equity / totalEquity) * 100
-          return {
-            productId: productProfitability.portfolioProductId,
-            productName: productProfitability.productName,
-            productTypeId: productProfitability.productTypeId as ProductTypeId,
-            productFinantialInstitutionId: productProfitability.financialInstitutionId,
-            productFinantialInstitutionName: productProfitability.financialInstitutionName,
-            portfolioPercentage,
-            profitabilityThisMonth: productProfitability.inTheMonth && productProfitability.inTheMonth.portfolioProfitability,
-            profitabilityLast12Months: productProfitability.inTwelveMonths && productProfitability.inTwelveMonths.portfolioProfitability,
-            relativeProfitabilityThisMonth: productProfitability.inTheMonth && ((productProfitability.inTheMonth.portfolioProfitability / 100) * portfolioPercentage),
-            relativeProfitabilityLast12Months: productProfitability.inTwelveMonths && ((productProfitability.inTwelveMonths.portfolioProfitability / 100) * portfolioPercentage)
+      const values: PortfolioSummaryDynamicValues & PortfolioSummaryRangedValues = {
+        portfolioPercentage: {
+          smallest: 0,
+          largest: 1,
+          current: 1
+        }
+      }
+
+      for (const range of ranges) {
+        const lastXMonths = monthlyProfitabilityBeforeReferenceDate.slice(-range.byMonths)
+        const lastXMonthsAbsoluteProfitability = (lastXMonths.reduce((acc, monthItem) => acc * (1 + (monthItem.profitability / 100)), 1) - 1)
+        const lastXMonthsRelativeProfitability = lastXMonthsAbsoluteProfitability
+        const lastXMonthsAverageProfitability = compoundConvertion(lastXMonthsAbsoluteProfitability, 1 / lastXMonths.length)
+
+        values[`${range.byName}AbsoluteProfitability`] = {
+          smallest: null,
+          largest: null,
+          current: lastXMonthsAbsoluteProfitability
+        }
+
+        values[`${range.byName}RelativeProfitability`] = {
+          smallest: null,
+          largest: null,
+          current: lastXMonthsRelativeProfitability
+        }
+
+        values[`${range.byName}AverageProfitability`] = {
+          smallest: null,
+          largest: null,
+          current: lastXMonthsAverageProfitability
+        }
+      }
+
+      for (const range of ranges) {
+
+        const lastXMonths = monthlyProfitabilityBeforeReferenceDate.slice(-range.byMonths)
+
+        values[`${range.byName}AbsoluteProfitability`].smallest = smallest(lastXMonths, (monthItem) => monthItem.profitability / 100)
+        values[`${range.byName}AbsoluteProfitability`].largest = largest(lastXMonths, (monthItem) => monthItem.profitability / 100)
+        values[`${range.byName}RelativeProfitability`].smallest = smallest(lastXMonths, (monthItem) => monthItem.profitability / 100)
+        values[`${range.byName}RelativeProfitability`].largest = largest(lastXMonths, (monthItem) => monthItem.profitability / 100)
+        values[`${range.byName}AverageProfitability`].smallest = smallest(lastXMonths, () => compoundConvertion(smallest(lastXMonths, (monthItem) => monthItem.profitability / 100), 1 / lastXMonths.length))
+        values[`${range.byName}AverageProfitability`].largest = largest(lastXMonths, () => compoundConvertion(largest(lastXMonths, (monthItem) => monthItem.profitability / 100), 1 / lastXMonths.length))
+      }
+
+      const products: PortfolioSummaryProducts = []
+
+      for (const productStatistic of productsStatistics) {
+
+        const productRangedValues: PortfolioSummaryRangedValues = {
+          portfolioPercentage: {
+            smallest: null,
+            largest: null,
+            current: (productStatistic.equity / totalEquity)
           }
+        }
+
+        const productDynamicRangedValues: PortfolioSummaryDynamicValues = {
+
+        }
+
+        for (const range of ranges) {
+
+          const lastXMonthsAbsoluteProfitability = productStatistic[range.byName] && productStatistic[range.byName].portfolioProfitability / 100
+          const lastXMonthsRelativeProfitability = productStatistic[range.byName] && ((productStatistic[range.byName].portfolioProfitability / 100) * productRangedValues.portfolioPercentage.current)
+          const lastXMonthsAverageProfitability = compoundConvertion(lastXMonthsAbsoluteProfitability, 1 / range.byMonths)
+
+          productRangedValues[`${range.byName}AbsoluteProfitability`] = {
+            smallest: null,
+            largest: null,
+            current: lastXMonthsAbsoluteProfitability
+          }
+          productRangedValues[`${range.byName}RelativeProfitability`] = {
+            smallest: null,
+            largest: null,
+            current: lastXMonthsRelativeProfitability
+          }
+          productRangedValues[`${range.byName}AverageProfitability`] = {
+            smallest: null,
+            largest: null,
+            current: lastXMonthsAverageProfitability
+          }
+        }
+
+        products.push({
+          productId: productStatistic.portfolioProductId,
+          productName: productStatistic.productName,
+          productTypeId: productStatistic.productTypeId as ProductTypeId,
+          productFinantialInstitution: {
+            id: productStatistic.financialInstitutionId,
+            name: productStatistic.financialInstitutionName
+          },
+          productStrategy: {
+            id: productStatistic.strategyOfDiversificationId,
+            name: productStatistic.strategyOfDiversificationDescription
+          },
+          ...productRangedValues,
+          ...productDynamicRangedValues
         })
       }
 
-      result.portfolio.smallestThisMonthProfitability = smallest(result.products, (product) => product.profitabilityThisMonth)
-      result.portfolio.largestThisMonthProfitability = largest(result.products, (product) => product.profitabilityThisMonth)
-      result.portfolio.smallestLast12Profitability = smallest(result.products, (product) => product.profitabilityLast12Months)
-      result.portfolio.largestLast12Profitability = largest(result.products, (product) => product.profitabilityLast12Months)
-      result.portfolio.smallestPortfolioPercentage = smallest(result.products, (product) => product.portfolioPercentage)
-      result.portfolio.largestPortfolioPercentage = largest(result.products, (product) => product.portfolioPercentage)
-      result.portfolio.smallestRelativeProfitabilityThisMonth = smallest(result.products, (product) => product.relativeProfitabilityThisMonth)
-      result.portfolio.largestRelativeProfitabilityThisMonth = largest(result.products, (product) => product.relativeProfitabilityThisMonth)
-      result.portfolio.smallestRelativeProfitabilityLast12Months = smallest(result.products, (product) => product.relativeProfitabilityLast12Months)
-      result.portfolio.largestRelativeProfitabilityLast12Months = largest(result.products, (product) => product.relativeProfitabilityLast12Months)
+      for (const product of products) {
+
+        product.portfolioPercentage.smallest = smallest(products, (productItem) => productItem.portfolioPercentage.current)
+        product.portfolioPercentage.largest = largest(products, (productItem) => productItem.portfolioPercentage.current)
+
+        for (const range of ranges) {
+          product[`${range.byName}AbsoluteProfitability`].smallest = smallest(products, (productItem) => productItem[`${range.byName}AbsoluteProfitability`].current)
+          product[`${range.byName}AbsoluteProfitability`].largest = largest(products, (productItem) => productItem[`${range.byName}AbsoluteProfitability`].current)
+          product[`${range.byName}RelativeProfitability`].smallest = smallest(products, (productItem) => productItem[`${range.byName}RelativeProfitability`].current)
+          product[`${range.byName}RelativeProfitability`].largest = largest(products, (productItem) => productItem[`${range.byName}RelativeProfitability`].current)
+          product[`${range.byName}AverageProfitability`].smallest = smallest(products, (productItem) => productItem[`${range.byName}AverageProfitability`].current)
+          product[`${range.byName}AverageProfitability`].largest = largest(products, (productItem) => productItem[`${range.byName}AverageProfitability`].current)
+        }
+      }
+
+      const result: PortfolioSummary = {
+        portfolioId,
+        newValuesAt: this.portfoliosNewValuesData[portfolioId].newValuesAt.toDate(),
+        monthReference: monthReference.toDate(),
+        firstApplicationDate: dayjs(portfolio.firstApplicationDate).utc(true).toDate(),
+        lastUpdateDate: dayjs(portfolio.lastUpdateDate).utc(true).toDate(),
+        ...values,
+        products
+      }
 
       return result
     } catch (ex) {
-      throw new BackendServiceError('Não foi possível recuperar os produtos do portifólio', ex)
+      throw new BackendServiceError('Não foi possível obter os produtos do portifólio', ex)
     }
   }
 
@@ -295,5 +452,15 @@ export default class BackendService implements BackendServiceInterface {
     } catch (ex) {
       throw new BackendServiceError('Não foi possível desconectar')
     }
+  }
+
+  @IPCInvoke()
+  getPreference<Key extends keyof PreferenceData>(key: Key): Promise<Required<PreferenceData>[Key]> {
+    return Promise.resolve(this.preferenceStore.get(key))
+  }
+
+  @IPCInvoke()
+  setPreference<Key extends keyof PreferenceData>(key: Key, value?: PreferenceData[Key]): Promise<void> {
+    return Promise.resolve(this.preferenceStore.set(key, value))
   }
 }

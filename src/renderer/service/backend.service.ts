@@ -1,6 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import BackendServiceInterface from "shared/service/backend.service.interface";
 import { KinvoCredential, KinvoCredentialResponse, Portfolios, PortfolioSummary } from "shared/type/backend.types"
+import { PreferenceData } from "shared/type/preference.type";
 
 const { ipcRenderer } = window.electron
 
@@ -50,6 +51,22 @@ class BackendService implements BackendServiceInterface {
   async logout() {
     try {
       return await ipcRenderer.invoke<void>('BackendService:logout')
+    } catch (ex) {
+      throw new InvokeError(BackendService.parseErrorMessage(ex))
+    }
+  }
+
+  async getPreference<Key extends keyof PreferenceData>(key: Key): Promise<Required<PreferenceData>[Key]> {
+    try {
+      return await ipcRenderer.invoke<Required<PreferenceData>[Key]>('BackendService:getPreference', key)
+    } catch (ex) {
+      throw new InvokeError(BackendService.parseErrorMessage(ex))
+    }
+  }
+
+  async setPreference<Key extends keyof PreferenceData>(key: Key, value?: PreferenceData[Key]): Promise<void> {
+    try {
+      return await ipcRenderer.invoke<void>('BackendService:setPreference', key, value)
     } catch (ex) {
       throw new InvokeError(BackendService.parseErrorMessage(ex))
     }

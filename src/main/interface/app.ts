@@ -5,6 +5,7 @@ import TrayWindow from './trayWindow';
 import LoggerService from '../service/logger.service';
 import ConfigService from '../service/config.service';
 import Resources from './resources';
+import PreferenceStore from '../store/preference.store';
 
 @Component()
 export default class App {
@@ -22,6 +23,9 @@ export default class App {
 
   @Inject()
   private resources: Resources
+
+  @Inject()
+  private preferenceStore: PreferenceStore
 
   private async installExtensions() {
     const installer = require('electron-devtools-installer');
@@ -75,11 +79,17 @@ export default class App {
       await this.installExtensions();
     }
 
+    const mainWindowPreference = this.preferenceStore.get('appMain', {
+      width: 550,
+      height: 650
+    })
+
     this.mainWindow = new BrowserWindow({
       show: false,
-      width: 530,
-      height: 600,
+      ...mainWindowPreference,
       icon: this.resources.windowIcon,
+      minWidth: 550,
+      minHeight: 650,
       frame: this.configService.isDebug,
       skipTaskbar: !this.configService.isDebug,
       alwaysOnTop: !this.configService.isDebug,
@@ -89,6 +99,13 @@ export default class App {
     });
 
     this.mainWindow.loadURL(this.resources.index);
+
+    this.mainWindow.on('resized', () => {
+      const newBounds = this.mainWindow.getBounds()
+      mainWindowPreference.width = newBounds.width
+      mainWindowPreference.height = newBounds.height
+      this.preferenceStore.set('appMain', mainWindowPreference)
+    })
 
     if (this.configService.isDebug && !this.configService.forceTray) {
       this.mainWindow.on('ready-to-show', () => {

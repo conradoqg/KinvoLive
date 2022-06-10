@@ -69,3 +69,20 @@ export const namedColor = {
 export function colorByRange(value: number, min: number, max: number, leftColor, rightColor) {
   return rgbToString(colorGradient(norm(value, min, max), leftColor, rightColor))
 }
+
+export function triColor(current: number, smallest: number, largest: number): string {
+  const roundedValue = Math.round((current + Number.EPSILON) * 10000) / 10000
+  let normalizedValue = null
+  let gradient = null
+
+  if (roundedValue < 0) {
+    normalizedValue = norm(roundedValue, 0, smallest)
+    gradient = colorGradient(normalizedValue, hexToRgb(red[300]), hexToRgb(red[900]))
+  } else if (roundedValue > 0) {
+    normalizedValue = norm(roundedValue, largest, 0)
+    gradient = colorGradient(normalizedValue, hexToRgb(green[900]), hexToRgb(green[300]))
+  } else {
+    gradient = hexToRgb(blue[500])
+  }
+  return rgbToString(gradient)
+}

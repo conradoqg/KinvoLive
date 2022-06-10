@@ -1,39 +1,209 @@
+/* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { ButtonGroup, Divider, FormControl, Grid, InputLabel, Link, MenuItem, Paper, Select, Skeleton, Snackbar, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import { Portfolios, PortfolioSummary } from 'shared/type/backend.types';
+import { Box, Button, Checkbox, ClickAwayListener, Divider, Grid, GridSize, IconButton, Link, ListItemIcon, MenuItem, MenuList, Paper, Popper, Skeleton, Snackbar, Tooltip, Typography, useTheme } from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { Portfolios, PortfolioSummary, PortfolioSummaryProduct, PortfolioSummaryRangedValue, ranges } from 'shared/type/backend.types';
 import React, { useEffect, useState } from 'react';
-import { blue, green, red } from '@mui/material/colors';
+import { blue } from '@mui/material/colors';
 import dayjs, { Dayjs } from 'dayjs';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { LoadingButton } from '@mui/lab';
-import { norm } from '../shared/helpers/math';
+import PopupState, { bindPopper, bindTrigger } from 'material-ui-popup-state';
 import formatters from '../shared/helpers/formatters'
-import { colorByRange, colorGradient, hexToRgb, rgbToString } from '../shared/helpers/color';
+import { colorByIndex, colorByRange, hexToRgb, triColor } from '../shared/helpers/color';
 import loggerService from './service/logger.service';
-import Alert from './components/Alert';
+import Alert from './component/common/Alert';
 import backendService from './service/backend.service';
-import { capitalizeFirstLetter } from '../shared/helpers/string';
-
-type SortOptions = {
-  field: string
-  order: number
-}
+import ScrollableBox from './component/common/ScrollableBox';
+import MonthSelect from './component/part/MonthSelect';
+import PortfolioSelect from './component/part/PortfolioSelect';
+import { usePreferenceContext } from './context/usePreferenceContext';
 
 // TODO: Centralize
 const UPDATE_INTERVAL = dayjs.duration(30, 'minute').asMilliseconds()
+
+type AvaliableCols = {
+  id: string;
+  title: string;
+  shortTitle: string;
+  style?: {
+    xs?: boolean | GridSize;
+    zeroMinWidth?: boolean;
+    minWidth?: number;
+    maxWidth?: number
+    textAlign: string;
+  };
+  getValueToSortBy: (value: unknown) => unknown;
+  displayRowValue?: (value?: unknown) => string;
+  displayTooltipValue?: (value?: unknown) => string;
+  displayTotalValue?: (value?: unknown) => string;
+  color?: (value?: unknown) => string;
+  backgroundColor?: (value?: unknown) => string;
+}[]
+
+const buildAvailableCols = (): AvaliableCols => {
+
+  const percentageDisplayValue = (value: { current: number }): string => formatters.percentage(value.current)
+  const triColorDisplayColor = (values: { current: number, smallest: number, largest: number }): string => triColor(values.current, values.smallest, values.largest)
+  const rangeColorDisplayColor = (values: { current: number, smallest: number, largest: number }): string => colorByRange(values.current, values.smallest, values.largest, hexToRgb(blue[300]), hexToRgb(blue[900]))
+
+  const baseCols: AvaliableCols = [{
+    id: 'productTypeId',
+    title: 'Categoria',
+    shortTitle: 'C',
+    style: {
+      xs: false,
+      minWidth: 35,
+      textAlign: 'center'
+    },
+    displayTooltipValue: (value: string) => formatters.categoryFormatter[value].displayText,
+    backgroundColor: (value: string) => formatters.categoryFormatter[value].color,
+    getValueToSortBy: (value: string): string => value
+  }, {
+    id: 'productFinantialInstitution',
+    title: 'Instituição',
+    shortTitle: 'I',
+    style: {
+      xs: false,
+      minWidth: 35,
+      textAlign: 'center'
+    },
+    displayTooltipValue: (value: { id: number, name: string }) => value.name,
+    backgroundColor: (value: { id: number, name: string }) => colorByIndex(value.id),
+    getValueToSortBy: (value: { id: number, name: string }): string => value.name
+  }, {
+    id: 'productStrategy',
+    title: 'Estratégia',
+    shortTitle: 'E',
+    style: {
+      xs: false,
+      minWidth: 35,
+      textAlign: 'center'
+    },
+    displayTooltipValue: (value: { id: number, name: string }) => value.name,
+    backgroundColor: (value: { id: number, name: string }) => colorByIndex(value.id),
+    getValueToSortBy: (value: { id: number, name: string }): string => value.name
+  }, {
+    id: 'productName',
+    title: 'Nome do investimento',
+    shortTitle: 'Nome',
+    style: {
+      xs: true,
+      zeroMinWidth: true,
+      textAlign: 'left',
+      minWidth: 150
+    },
+    displayTooltipValue: (value: string) => value,
+    displayRowValue: (value: string): string => value,
+    displayTotalValue: (): string => 'Total',
+    getValueToSortBy: (value: string): string => value
+  }]
+
+  const rangeBasedCols = [{
+    id: 'AbsoluteProfitability',
+    title: 'Variação',
+    shortTitle: '%',
+    style: {
+      xs: 1,
+      minWidth: 70,
+      textAlign: 'center'
+    },
+    displayRowValue: percentageDisplayValue,
+    displayTotalValue: percentageDisplayValue,
+    color: triColorDisplayColor,
+    getValueToSortBy: (value: PortfolioSummaryRangedValue) => value.current
+  }, {
+    id: 'RelativeProfitability',
+    title: 'Variação relativa',
+    shortTitle: '∝',
+    style: {
+      xs: 1,
+      minWidth: 70,
+      textAlign: 'center'
+    },
+    displayRowValue: percentageDisplayValue,
+    displayTotalValue: percentageDisplayValue,
+    color: triColorDisplayColor,
+    getValueToSortBy: (value: PortfolioSummaryRangedValue) => value.current
+  }, {
+    id: 'AverageProfitability',
+    title: 'Variação média por mês',
+    shortTitle: 'x̄',
+    style: {
+      xs: 1,
+      minWidth: 70,
+      textAlign: 'center'
+    },
+    displayRowValue: percentageDisplayValue,
+    displayTotalValue: percentageDisplayValue,
+    color: triColorDisplayColor,
+    getValueToSortBy: (value: PortfolioSummaryRangedValue) => value.current
+  }]
+
+  const fixedCols = [{
+    id: 'portfolioPercentage',
+    title: 'Representividade no portifólio',
+    shortTitle: 'R (%)',
+    style: {
+      xs: 1,
+      minWidth: 70,
+      textAlign: 'center'
+    },
+    displayRowValue: percentageDisplayValue,
+    displayTotalValue: percentageDisplayValue,
+    color: rangeColorDisplayColor,
+    getValueToSortBy: (value: PortfolioSummaryRangedValue) => value.current
+  }]
+
+  const availableCols: AvaliableCols = []
+
+  availableCols.push(...baseCols)
+
+  for (const range of ranges) {
+    for (const rangeBasedCol of rangeBasedCols) {
+      availableCols.push({
+        id: `${range.id}${rangeBasedCol.id}`,
+        title: `${rangeBasedCol.title} ${range.name}`,
+        shortTitle: `${range.shortName} (${rangeBasedCol.shortTitle})`,
+        style: rangeBasedCol.style,
+        displayRowValue: rangeBasedCol.displayRowValue,
+        displayTotalValue: rangeBasedCol.displayTotalValue,
+        color: rangeBasedCol.color,
+        getValueToSortBy: rangeBasedCol.getValueToSortBy
+      })
+    }
+  }
+
+  for (const fixedCol of fixedCols) {
+    availableCols.push({
+      id: `${fixedCol.id}`,
+      title: `${fixedCol.title}`,
+      shortTitle: `${fixedCol.shortTitle}`,
+      style: fixedCol.style,
+      displayRowValue: fixedCol.displayRowValue,
+      displayTotalValue: fixedCol.displayTotalValue,
+      color: fixedCol.color,
+      getValueToSortBy: fixedCol.getValueToSortBy
+    })
+  }
+
+  return availableCols
+}
+
+const availableCols = buildAvailableCols()
 
 export default function PortfoliosPage() {
   const [portfolios, setPortfolios] = useState<Portfolios>(null)
   const [selectedPortfolio, setSelectedPortfolio] = useState<number>(null)
   const [selectedMonth, setSelectedMonth] = useState<Dayjs>(null)
   const [portfolioSummary, setPortfolioSummary] = useState<PortfolioSummary>(null)
-  const [sortOptions, setSortOptions] = useState<SortOptions>({ field: 'relativeProfitabilityThisMonth', order: 1 })
   const [errorMessage, setErrorMessage] = useState<string>(null)
-  const [valueType, setValueType] = useState<string>('proportional')
+  const [preferences, preferencesActions] = usePreferenceContext()
   // TODO: Split loading variables
   const [loadingPortfolioSummary, setLoadingPortfolioSummary] = useState<boolean>(true)
+  const theme = useTheme()
+
+  const { sortOptions, selectedCols } = preferences.portfoliosPage
 
   useEffect(() => {
     const updatePortfolios = async () => {
@@ -82,55 +252,6 @@ export default function PortfoliosPage() {
     return () => clearInterval(checkForUpdateInterval)
   }, [selectedPortfolio, selectedMonth])
 
-  const sortedProducts = portfolioSummary && portfolioSummary.products.
-    sort((leftProduct, rightProduct) => leftProduct[sortOptions.field] > rightProduct[sortOptions.field] ? sortOptions.order * -1 : sortOptions.order * 1)
-
-  const sortAdornment = (field: string) => {
-    if (sortOptions.field === field) return (sortOptions.order > 0 ? '↑' : '↓')
-    return ''
-  }
-
-  const changeSort = (field: string) => setSortOptions({ field, order: sortOptions.order * -1 })
-
-  // TODO: Refactor
-  const colorByValue = (referenceField: string, value: number) => {
-    const roundedValue = Math.round((value + Number.EPSILON) * 100) / 100
-    let normalizedValue = null
-    let gradient = null
-
-    let smallestField = null
-    let largestField = null
-
-    if (referenceField === 'M') {
-      smallestField = portfolioSummary.portfolio.smallestThisMonthProfitability
-      largestField = portfolioSummary.portfolio.largestThisMonthProfitability
-    } else if (referenceField === '12M') {
-      smallestField = portfolioSummary.portfolio.smallestLast12Profitability
-      largestField = portfolioSummary.portfolio.largestLast12Profitability
-    } else if (referenceField === 'MR') {
-      smallestField = portfolioSummary.portfolio.smallestRelativeProfitabilityThisMonth
-      largestField = portfolioSummary.portfolio.largestRelativeProfitabilityThisMonth
-    } else if (referenceField === '12MR') {
-      smallestField = portfolioSummary.portfolio.smallestRelativeProfitabilityLast12Months
-      largestField = portfolioSummary.portfolio.largestRelativeProfitabilityLast12Months
-    }
-
-    if (roundedValue < 0) {
-      normalizedValue = norm(roundedValue, 0, smallestField)
-      gradient = colorGradient(normalizedValue, hexToRgb(red[300]), hexToRgb(red[900]))
-    } else if (roundedValue > 0) {
-      normalizedValue = norm(roundedValue, largestField, 0)
-      gradient = colorGradient(normalizedValue, hexToRgb(green[900]), hexToRgb(green[300]))
-    } else {
-      gradient = hexToRgb(blue[500])
-    }
-    return rgbToString(gradient)
-  }
-
-  const handleValueTypeChange = (_event: React.MouseEvent<HTMLElement>, newValueType: string) => {
-    setValueType(newValueType);
-  };
-
   const handleRefreshClick = async () => {
     loggerService.debug('Calling getPortfolioSummary')
     setLoadingPortfolioSummary(true)
@@ -144,120 +265,157 @@ export default function PortfoliosPage() {
     }
   }
 
-  const handleMonthChange = async (direction: number) => {
-    let newMonth = selectedMonth
-    if (!selectedMonth) newMonth = dayjs(portfolioSummary.portfolio.monthReference)
-    newMonth = newMonth.add(direction, 'month')
-    loggerService.debug(`Changing month to ${newMonth.toISOString()}`)
-    setSelectedMonth(newMonth)
+  const handleSortChange = (colId: string) => preferencesActions.portfoliosPage.setSortOptions({ field: colId, order: sortOptions.order * -1 })
+  const handleCheckColChange = (colId: string, checked: boolean) => preferencesActions.portfoliosPage.setSelectedCols({ ...selectedCols, [colId]: checked });
+
+  const sortAdornment = (field: string) => (sortOptions.field === field ? (sortOptions.order > 0 ? '↑' : '↓') : '')
+  const isColSelected = (colId: string) => Object.entries(selectedCols).filter(([selectedColId, selected]) => selectedColId === colId && selected === true).length > 0;
+  const sortProducts = (leftProduct: PortfolioSummaryProduct, rightProduct: PortfolioSummaryProduct) => {
+    const leftColMeta = availableCols.find(col => col.id === sortOptions.field)
+    const rightColMeta = availableCols.find(col => col.id === sortOptions.field)
+    return leftColMeta.getValueToSortBy(leftProduct[sortOptions.field]) > rightColMeta.getValueToSortBy(rightProduct[sortOptions.field]) ? sortOptions.order * -1 : sortOptions.order * 1
   }
+
+  const sortedProducts = portfolioSummary && portfolioSummary.products.sort(sortProducts)
+
+  const monthToShow = selectedMonth || (portfolioSummary && dayjs(portfolioSummary.monthReference))
 
   // TODO: Refactor
   return (
     <>
-      <Paper elevation={0} sx={{ padding: 1 }}>
-        <Grid container alignItems='center' textAlign='center'>
-          <Grid item xs>
-            <FormControl sx={{ m: 1, minWidth: 150 }} size="small">
-              <InputLabel id="demo-select-small">Carteira</InputLabel>
-              <Select
-                labelId="demo-select-small"
-                id="demo-simple-select"
-                value={selectedPortfolio !== null ? selectedPortfolio.toString() : ''}
-                label="Carteira"
-                onChange={(event) => setSelectedPortfolio(parseInt(event.target.value, 10))}
-              >
-                {portfolios ? portfolios.map((portifolio) => <MenuItem key={portifolio.id} value={portifolio.id}>{portifolio.title}</MenuItem>) : <Skeleton />}
-              </Select>
-            </FormControl>
+      <Box height="100%" display="flex" flexDirection="column" pt={1} pb={1}>
+        <Box>
+          <Grid container alignItems='center' textAlign='center'>
+            <Grid item xs>
+              <PortfolioSelect loading={selectedPortfolio == null} selectedPortfolio={selectedPortfolio} portfolios={portfolios} onChange={(newSelectedPortfolio) => setSelectedPortfolio(newSelectedPortfolio)} />
+            </Grid>
+            <Grid item xs>
+              <MonthSelect
+                loading={loadingPortfolioSummary}
+                selectedMonth={monthToShow}
+                smallestMonth={portfolioSummary && dayjs(portfolioSummary.firstApplicationDate)}
+                largestMonth={dayjs()}
+                onMonthChange={(newSelectedMonth) => setSelectedMonth(newSelectedMonth)}
+              />
+            </Grid>
+            <Grid item xs={false}>
+              <PopupState variant="popper" popupId="demo-popup-menu">
+                {(popupState) => (
+                  <>
+                    <LoadingButton size="small" sx={{ minWidth: 32, marginLeft: 1, marginRight: 1 }} loading={loadingPortfolioSummary} variant='contained' {...bindTrigger(popupState)}>
+                      <SettingsIcon />
+                    </LoadingButton>
+                    <Popper {...bindPopper(popupState)} placement='bottom-start' >
+                      <Paper>
+                        <ScrollableBox sx={{ maxHeight: 300 }}>
+                          <ClickAwayListener onClickAway={popupState.close}>
+                            <MenuList dense>
+                              {(availableCols.map(availableCol => (<MenuItem key={availableCol.id} ><ListItemIcon><Checkbox edge="start" checked={isColSelected(availableCol.id)} onChange={(event) => handleCheckColChange(availableCol.id, event.target.checked)} tabIndex={-1} disableRipple /></ListItemIcon>{availableCol.title}</MenuItem>)))}
+                            </MenuList>
+                          </ClickAwayListener>
+                        </ScrollableBox>
+                      </Paper>
+                    </Popper>
+                  </>
+                )}
+              </PopupState>
+            </Grid>
+            <Grid item xs={false}>
+              <LoadingButton size="small" sx={{ minWidth: 32, marginLeft: 1, marginRight: 1 }} loading={loadingPortfolioSummary} variant='contained' onClick={handleRefreshClick}>
+                <RefreshIcon />
+              </LoadingButton>
+            </Grid>
           </Grid>
-          <Grid item xs>
-            <ButtonGroup variant="contained" aria-label="outlined primary button group">
-              <LoadingButton onClick={() => handleMonthChange(-1)} size="small" loading={loadingPortfolioSummary} variant="contained" disabled={dayjs().subtract(2, 'months').isSameOrAfter(selectedMonth, 'month')}><KeyboardArrowLeftIcon /></LoadingButton>
-              <Typography alignSelf='center' sx={{ marginLeft: 3, marginRight: 3 }}>{loadingPortfolioSummary ? <Skeleton width={50} /> : (portfolioSummary && capitalizeFirstLetter(dayjs(portfolioSummary.portfolio.monthReference).format('MMM - YY')))}</Typography>
-              <LoadingButton onClick={() => handleMonthChange(1)} size="small" loading={loadingPortfolioSummary} variant="contained" disabled={!selectedMonth || dayjs().isSameOrBefore(selectedMonth, 'month')}> <KeyboardArrowRightIcon /></LoadingButton>
-            </ButtonGroup>
-          </Grid>
-          <Grid item xs={false}>
-            <LoadingButton size="small" loading={loadingPortfolioSummary} variant='contained' onClick={handleRefreshClick}>
-              <RefreshIcon />
-            </LoadingButton>
-          </Grid>
-        </Grid>
-        <Grid container alignItems='center'>
-          <Grid item xs textAlign='center'>
-            <b>Mês (%):</b> {portfolioSummary ? (<Typography sx={{ display: 'inline', color: colorByValue('M', portfolioSummary.portfolio.profitabilityThisMonth) }}>{formatters.percentage(portfolioSummary.portfolio.profitabilityThisMonth / 100)}</Typography>) : (<Typography sx={{ display: 'inline' }}><Skeleton variant="text" width={30} sx={{ display: 'inline-block' }} /></Typography>)}
-          </Grid>
-          <Grid item xs textAlign='center'>
-            <b>12M (%):</b> {portfolioSummary ? (<Typography sx={{ display: 'inline', color: colorByValue('M', portfolioSummary.portfolio.profitabilityLast12Months) }}>{formatters.percentage(portfolioSummary.portfolio.profitabilityLast12Months / 100)}</Typography>) : (<Typography sx={{ display: 'inline' }}><Skeleton variant="text" width={30} sx={{ display: 'inline-block' }} /></Typography>)}
-          </Grid>
-          <Grid item xs="auto">
-            <ToggleButtonGroup
-              sx={{ m: 1 }}
-              value={valueType}
-              size='small'
-              exclusive
-              onChange={handleValueTypeChange}
-            >
-              <ToggleButton disabled={loadingPortfolioSummary} value="proportional"><Tooltip title="Proporcional"><Typography>∝</Typography></Tooltip></ToggleButton>
-              <ToggleButton disabled={loadingPortfolioSummary} value="absolute"><Tooltip title="Porcentagem"><Typography>%</Typography></Tooltip></ToggleButton>
-            </ToggleButtonGroup>
-          </Grid>
-        </Grid>
-        <Grid container wrap="nowrap" >
-          <Grid item xs={false} textAlign='center' sx={{ minWidth: 20 }}><Tooltip title="Categoria"><Link href="#" underline="hover" noWrap color="inherit" onClick={() => changeSort('productTypeId')}><b>C</b> {sortAdornment('productTypeId')}</Link></Tooltip></Grid>
-          <Grid item xs zeroMinWidth><Tooltip title="Nome do investimento"><Link href="#" underline="hover" paddingLeft={1} noWrap color="inherit" onClick={() => changeSort('productName')}><b>Nome</b> {sortAdornment('productName')}</Link></Tooltip></Grid>
-          {valueType === 'proportional' && (<>
-            <Grid item xs={1} minWidth={60} textAlign='center'><Tooltip title="Variação proporcional a representividade no mês"><Link href="#" underline="hover" noWrap color="inherit" onClick={() => changeSort('relativeProfitabilityThisMonth')}><b>M (∝)</b> {sortAdornment('relativeProfitabilityThisMonth')}</Link></Tooltip></Grid>
-            <Grid item xs={1} minWidth={60} textAlign='center'><Tooltip title="Variação proporcional a representividade nos últimos 12 meses"><Link href="#" underline="hover" noWrap color="inherit" onClick={() => changeSort('relativeProfitabilityLast12Months')}><b>12M (∝)</b> {sortAdornment('relativeProfitabilityLast12Months')}</Link></Tooltip></Grid>
-          </>)}
-          {valueType === 'absolute' && (<>
-            <Grid item xs={1} minWidth={60} textAlign='center'><Tooltip title="Variação no mês"><Link href="#" underline="hover" noWrap color="inherit" onClick={() => changeSort('profitabilityThisMonth')}><b>M (%)</b> {sortAdornment('profitabilityThisMonth')}</Link></Tooltip></Grid>
-            <Grid item xs={1} minWidth={60} textAlign='center'><Tooltip title="Variação nos último 12 meses"><Link href="#" underline="hover" noWrap color="inherit" onClick={() => changeSort('profitabilityLast12Months')}><b>12M (%)</b> {sortAdornment('profitabilityLast12Months')}</Link></Tooltip></Grid>
-          </>)}
-          <Grid item xs={1} minWidth={60} textAlign='center'><Tooltip title="Representatividade no portifólio"><Link href="#" underline="hover" noWrap color="inherit" onClick={() => changeSort('portfolioPercentage')}><b>R (%)</b> {sortAdornment('portfolioPercentage')}</Link></Tooltip></Grid>
-        </Grid>
-        <Divider />
-        {sortedProducts ? sortedProducts
-          .map(product => (
-            <React.Fragment key={product.productId}>
-              <Grid container wrap="nowrap">
-                <Grid item xs={false} sx={{ backgroundColor: formatters.categoryFormatter[product.productTypeId].color, minWidth: 20 }}><Tooltip title={formatters.categoryFormatter[product.productTypeId].displayText} placement="right" disableInteractive><Typography>&nbsp;</Typography></Tooltip></Grid>
-                <Grid item xs zeroMinWidth><Tooltip title={product.productName} disableInteractive><Typography noWrap paddingLeft={1}>{product.productName}</Typography></Tooltip></Grid>
-                {valueType === 'proportional' && (<>
-                  <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline', color: colorByValue('MR', product.relativeProfitabilityThisMonth) }}>{formatters.percentage(product.relativeProfitabilityThisMonth / 100)}</Typography></Grid>
-                  <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline', color: colorByValue('12MR', product.relativeProfitabilityLast12Months) }}>{formatters.percentage(product.relativeProfitabilityLast12Months / 100)}</Typography></Grid>
-                </>)}
-                {valueType === 'absolute' && (<>
-                  <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline', color: colorByValue('M', product.profitabilityThisMonth) }}>{formatters.percentage(product.profitabilityThisMonth / 100)}</Typography></Grid>
-                  <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline', color: colorByValue('12M', product.profitabilityLast12Months) }}>{formatters.percentage(product.profitabilityLast12Months / 100)}</Typography></Grid>
-                </>)}
-                <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline', color: colorByRange(product.portfolioPercentage, portfolioSummary.portfolio.smallestPortfolioPercentage, portfolioSummary.portfolio.largestPortfolioPercentage, hexToRgb(blue[300]), hexToRgb(blue[900])) }}>{formatters.percentage(product.portfolioPercentage / 100)}</Typography></Grid>
-              </Grid>
-              <Divider />
-            </React.Fragment>
-          )) : (<>
-            {[...Array(3).keys()].map((key) =>
-              <React.Fragment key={key}>
-                <Grid container wrap="nowrap">
-                  <Grid item xs={false} sx={{ minWidth: 20 }}><Typography><Skeleton /></Typography></Grid>
-                  <Grid item xs zeroMinWidth><Typography noWrap paddingLeft={1}><Skeleton /></Typography></Grid>
-                  <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline' }}><Skeleton /></Typography></Grid>
-                  <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline' }}><Skeleton /></Typography></Grid>
-                  <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline' }}><Skeleton /></Typography></Grid>
-                  <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline' }}><Skeleton /></Typography></Grid>
-                  <Grid item xs={1} minWidth={60} textAlign='center'><Typography sx={{ display: 'inline' }}><Skeleton /></Typography></Grid>
+        </Box>
+        <ScrollableBox flex={1} display="grid" gridAutoRows="min-content" flexDirection="column" mt={1}>
+          <Grid container wrap="nowrap" alignItems='center' sx={{ position: 'sticky', top: 0, backgroundColor: theme.palette.background.paper }}>
+            {availableCols.filter(availableCol => isColSelected(availableCol.id)).map(availableCol => {
+              return (
+                <Grid item key={availableCol.id} xs={availableCol.style.xs} minWidth={availableCol.style.minWidth} sx={availableCol.style.textAlign && { textAlign: availableCol.style.textAlign }}>
+                  <Tooltip title={availableCol.title}>
+                    <Link noWrap sx={{ paddingLeft: 1, paddingRight: 1 }} href="#" underline="hover" color="inherit" onClick={() => handleSortChange(availableCol.id)}><b>{availableCol.shortTitle}</b> {sortAdornment(availableCol.id)}</Link>
+                  </Tooltip>
                 </Grid>
-                <Divider />
-              </React.Fragment>
-            )}
-          </>)}
-        {portfolioSummary && (<Grid container wrap="nowrap" >
-          <Grid item xs={12} textAlign='center'>
-            <Typography variant="caption">Última mudança de valores em: {dayjs(portfolioSummary.portfolio.newValuesAt).format('lll')}</Typography>
+              )
+            })}
           </Grid>
-        </Grid>)}
-      </Paper>
+          {sortedProducts ? sortedProducts
+            .map((product, index) => (
+              <React.Fragment key={product.productId}>
+                <Grid container wrap="nowrap">
+                  {availableCols.filter(availableCol => isColSelected(availableCol.id)).map(availableCol => {
+                    let textContent = null
+
+                    if (availableCol.displayRowValue) {
+                      textContent = (<Typography noWrap sx={{ paddingLeft: 1, paddingRight: 1 }} minWidth={availableCol.style.minWidth} maxWidth={availableCol.style.maxWidth} color={availableCol.color && availableCol.color(product[availableCol.id])}>{availableCol.displayRowValue(product[availableCol.id])}</Typography>)
+                    } else {
+                      textContent =
+                        (<Box display='block' sx={{ paddingLeft: 1, paddingRight: 1, height: '100%' }} minWidth={availableCol.style.minWidth} >
+                          <Box display='block' sx={{ height: '100%', width: '100%', ...(availableCol.backgroundColor ? { backgroundColor: availableCol.backgroundColor(product[availableCol.id]) } : {}) }} />
+                        </Box>)
+                    }
+
+                    let textWrapperContent = null
+
+                    if (availableCol.displayTooltipValue) {
+                      textWrapperContent = (
+                        <Tooltip title={availableCol.displayTooltipValue(product[availableCol.id])} placement="right" disableInteractive>
+                          {textContent}
+                        </Tooltip>
+                      )
+                    } else {
+                      textWrapperContent = (
+                        <>
+                          {textContent}
+                        </>
+                      )
+                    }
+
+                    return (
+                      <Grid item key={availableCol.id} display="grid" xs={availableCol.style.xs} zeroMinWidth={availableCol.style.zeroMinWidth} minWidth={availableCol.style.minWidth} sx={availableCol.style.textAlign && { textAlign: availableCol.style.textAlign }}>
+                        {textWrapperContent}
+                      </Grid>
+                    )
+                  })}
+                </Grid>
+                {index + 1 < sortedProducts.length && <Divider />}
+              </React.Fragment>
+            )) : (<>
+              {[...Array(3).keys()].map((key) =>
+                <React.Fragment key={key}>
+                  <Grid container wrap="nowrap">
+                    {availableCols.filter(availableCol => isColSelected(availableCol.id)).map(availableCol => {
+                      return (
+                        <Grid item key={availableCol.id} display="grid" xs={availableCol.style.xs} zeroMinWidth={availableCol.style.zeroMinWidth} minWidth={availableCol.style.minWidth} sx={availableCol.style.textAlign && { textAlign: availableCol.style.textAlign }}>
+                          <Typography sx={{ paddingLeft: 1, paddingRight: 1 }} ><Skeleton /></Typography>
+                        </Grid>
+                      )
+                    })}
+                  </Grid>
+                  <Divider />
+                </React.Fragment>
+              )}
+            </>)}
+          {portfolioSummary && (
+            <Grid container wrap="nowrap" sx={{ position: 'sticky', bottom: 0, backgroundColor: theme.palette.background.paper }}>
+              <Divider />
+              {availableCols.filter(availableCol => isColSelected(availableCol.id)).map(availableCol => {
+                return (
+                  <Grid item key={availableCol.id} xs={availableCol.style.xs} zeroMinWidth={availableCol.style.zeroMinWidth} minWidth={availableCol.style.minWidth} sx={availableCol.style.textAlign && { textAlign: availableCol.style.textAlign }}>
+                    <Typography noWrap sx={{ paddingLeft: 1, paddingRight: 1 }} color={availableCol.color && availableCol.color(portfolioSummary[availableCol.id])}><b>{availableCol.displayRowValue && availableCol.displayRowValue(portfolioSummary[availableCol.id])}</b></Typography>
+                  </Grid>
+                )
+              })}
+            </Grid>)}
+        </ScrollableBox>
+        <Box mt={1}>
+          <Grid container wrap="nowrap" >
+            <Grid item xs={12} textAlign='center'>
+              <Typography variant="caption" sx={{ display: 'inline' }}>Última mudança de valores em: {portfolioSummary ? dayjs(portfolioSummary.newValuesAt).format('lll') : <Skeleton width={50} variant='text' sx={{ display: 'inline-block' }} />}</Typography>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
       <Snackbar
         open={errorMessage != null}
         onClose={() => setErrorMessage(null)}

@@ -16,3 +16,7 @@ export function smallest<T>(array: T[], getProperty: (data: T) => number) {
 export function largest<T>(array: T[], getProperty: (data: T) => number) {
   return array.map(item => getProperty(item)).reduce((acc, field) => Math.max(acc, field), Number.MIN_VALUE)
 }
+
+export function compoundConvertion(value: number, periods: number) {
+  return ((1 + (value)) ** periods) - 1
+}

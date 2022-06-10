@@ -3,9 +3,9 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import React, { useState } from "react"
 import { useNavigate, useLocation } from "react-router-dom";
 import dayjs from "dayjs";
-import { useAuth } from "./auth.provider";
+import { useAuthContext } from "./context/useAuthContext";
 import icon from '../../assets/icon.png';
-import Alert from "./components/Alert";
+import Alert from "./component/common/Alert";
 
 type LocationState = {
   from?: {
@@ -19,7 +19,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState<boolean>(false)
   const navigate = useNavigate();
   const location = useLocation();
-  const auth = useAuth();
+  const auth = useAuthContext();
 
   const from = (location.state as LocationState)?.from?.pathname || '/';
 
@@ -100,6 +100,7 @@ export default function LoginPage() {
           </LoadingButton>
         </Box>
       </Box>
+      {/* // TODO: Move to a global state */}
       <Snackbar
         open={errorMessage != null}
         onClose={() => setErrorMessage(null)}

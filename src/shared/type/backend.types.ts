@@ -24,37 +24,79 @@ export type Portfolios = {
   currencySymbol: string
 }[]
 
+export type PortfolioSummaryRanges = { byName: string, byMonths: number }[]
+
+export const ranges = [{
+  id: 'inTheMonth',
+  name: 'no mês',
+  shortName: 'M'
+}, {
+  id: 'inThreeMonths',
+  name: 'em três meses',
+  shortName: '3M'
+}, {
+  id: 'inSixMonths',
+  name: 'em seis meses',
+  shortName: '6M'
+}, {
+  id: 'inTwelveMonths',
+  name: 'em doze meses',
+  shortName: '12M'
+}, {
+  id: 'inTwentyfourMonths',
+  name: 'em vinte e quatro meses',
+  shortName: '24M'
+}, {
+  id: 'inTheYear',
+  name: 'no ano',
+  shortName: 'A'
+}, {
+  id: 'fromBeginning',
+  name: 'do começo',
+  shortName: 'C'
+}]
+
+export type PortfolioSummaryProducts = PortfolioSummaryProduct[]
+
 export type PortfolioSummary = {
-  portfolio: {
-    newValuesAt: Date;
-    monthReference: Date;
-    firstApplicationDate: Date,
-    lastUpdateDate: Date,
-    profitabilityThisMonth: number;
-    profitabilityLast12Months: number;
-    smallestThisMonthProfitability: number;
-    largestThisMonthProfitability: number;
-    smallestLast12Profitability: number;
-    largestLast12Profitability: number;
-    smallestPortfolioPercentage: number;
-    largestPortfolioPercentage: number;
-    smallestRelativeProfitabilityThisMonth: number;
-    largestRelativeProfitabilityThisMonth: number;
-    largestRelativeProfitabilityLast12Months: number;
-    smallestRelativeProfitabilityLast12Months: number;
-  };
-  products: {
-    productId: number;
-    productName: string;
-    productTypeId: ProductTypeId;
-    productFinantialInstitutionId: number;
-    productFinantialInstitutionName: string;
-    portfolioPercentage: number;
-    profitabilityThisMonth: number;
-    profitabilityLast12Months: number;
-    relativeProfitabilityThisMonth: number;
-    relativeProfitabilityLast12Months: number;
-  }[];
+  portfolioId: number;
+  newValuesAt: Date;
+  monthReference: Date;
+  firstApplicationDate: Date,
+  lastUpdateDate: Date,
+  products: PortfolioSummaryProducts;
+} & PortfolioSummaryDynamicValues & PortfolioSummaryRangedValues
+
+export type PortfolioSummaryProduct = {
+  productId: number;
+  productName: string;
+  productTypeId: ProductTypeId;
+  productFinantialInstitution: {
+    id: number;
+    name: string;
+  },
+  productStrategy: {
+    id: number;
+    name: string;
+  }
+} & PortfolioSummaryDynamicValues & PortfolioSummaryRangedValues
+
+type TimeRanges = 'inTheMonth' | 'inThreeMonths' | 'inSixMonths' | 'inTwelveMonths' | 'inTwentyfourMonths' | 'inTheYear' | 'fromBeginning'
+
+type RangedValues = 'AbsoluteProfitability' | 'RelativeProfitability' | 'AverageProfitability'
+
+export type PortfolioSummaryRangedValue = {
+  current: number;
+  smallest: number;
+  largest: number;
+}
+
+export type PortfolioSummaryRangedValues = {
+  portfolioPercentage: PortfolioSummaryRangedValue
+}
+
+export type PortfolioSummaryDynamicValues = {
+  [key in `${TimeRanges}${RangedValues}`]?: PortfolioSummaryRangedValue;
 }
 
 export type KinvoCredential = {
