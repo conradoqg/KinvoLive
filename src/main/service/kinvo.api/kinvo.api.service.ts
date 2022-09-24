@@ -46,7 +46,7 @@ export default class KinvoAPIService {
     this.loggerService.debug('Logging')
 
     const loginResponse = await this.axiosClient.post(
-      `${this.BASE_URL}/v2/auth/login`,
+      `${this.BASE_URL}/v3/auth/login`,
       {
         email: credential.email,
         password: credential.password
