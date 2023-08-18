@@ -19,7 +19,7 @@ const Mutex = () => semaphore({ limit: 1 });
 export default class KinvoAPIService {
   private readonly STORE_KEY = 'kinvo';
 
-  private BASE_URL = 'https://kinvo2c-api2.kinvo.com.br';
+  private BASE_URL = 'https://k2c-api.kinvo.com.br';
 
   private oAuthData: OAuthData | null;
 
