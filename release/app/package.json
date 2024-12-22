@@ -1,7 +1,7 @@
 {
   "name": "kinvo-live",
-  "version": "1.2.2",
-  "description": "Informações sobre o seu portifólio de bandeja",
+  "version": "1.2.3",
+  "description": "Informações sobre o seu portfólio de bandeja",
   "main": "./dist/main/main.js",
   "author": {
     "name": "Electron React Boilerplate Maintainers",

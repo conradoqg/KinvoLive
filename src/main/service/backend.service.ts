@@ -196,7 +196,8 @@ export default class BackendService implements BackendServiceInterface {
         monthReference = dayjs.min(dayjs(month).endOf('month').startOf('day'), monthReference)
       }
 
-      const [portfolioStatistics, productsStatistics] = await Promise.all([
+      const [portfolioProducts, portfolioStatistics, productsStatistics] = await Promise.all([
+        this.kinvoAPIService.getPortfolioQueryProductConsolidationGetProducts(portfolioId),
         this.kinvoAPIService.postPortfolioQueryPortfolioStatisticsGetStatisticsByDate({
           initialDate: portfolio.firstApplicationDate,
           finalDate: monthReference.toDate(),
@@ -293,6 +294,13 @@ export default class BackendService implements BackendServiceInterface {
       const products: PortfolioSummaryProducts = []
 
       for (const productStatistic of productsStatistics) {
+
+        const portfolioProduct = portfolioProducts.find(product => product.portfolioProductId === productStatistic.portfolioProductId)
+
+        if (portfolioProduct == null || portfolioProduct?.hasBalance === false) {
+          // eslint-disable-next-line no-continue
+          continue
+        }
 
         const productRangedValues: PortfolioSummaryRangedValues = {
           portfolioPercentage: {

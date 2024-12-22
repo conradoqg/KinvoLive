@@ -94,7 +94,7 @@ export default class App {
       skipTaskbar: !this.configService.isDebug,
       alwaysOnTop: !this.configService.isDebug,
       webPreferences: {
-        preload: this.resources.preloadScript
+        preload: this.resources.preloadScript,
       },
     });
 
