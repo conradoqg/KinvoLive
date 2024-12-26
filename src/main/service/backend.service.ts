@@ -181,7 +181,7 @@ export default class BackendService implements BackendServiceInterface {
       let trie = 1
       while (trie <= tries) {
         portfolio = await this.kinvoAPIService.getPortfolioQueryPortfolioConsolidationGetPortfolio(portfolioId)
-        if (portfolio.lastUpdateDate.toISOString() === '0001-01-01T03:00:00.000Z') {
+        if (dayjs(portfolio.lastUpdateDate).toISOString() === '0001-01-01T03:00:00.000Z') {
           this.loggerService.debug('Waiting for consolidation...')
           await delay(1000)
         } else {

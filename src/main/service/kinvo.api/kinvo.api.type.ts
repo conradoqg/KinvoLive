@@ -334,7 +334,8 @@ export enum ProductCountryCode {
 // and asserts the results at runtime
 export class Convert {
   public static toCapitalGainByPortfolioResponse(json: any): CapitalGainByPortfolioResponse {
-    return cast(json, r("CapitalGainByPortfolioResponse"));
+    return json as CapitalGainByPortfolioResponse
+    // return cast(json, r("CapitalGainByPortfolioResponse"));
   }
 
   public static capitalGainByPortfolioResponseToJson(value: CapitalGainByPortfolioResponse): any {
@@ -342,7 +343,8 @@ export class Convert {
   }
 
   public static toCapitalGainByPortfolioResponseData(json: any): CapitalGainByPortfolioResponseData {
-    return cast(json, r("CapitalGainByPortfolioResponseData"));
+    return json as CapitalGainByPortfolioResponseData
+    // return cast(json, r("CapitalGainByPortfolioResponseData"));
   }
 
   public static capitalGainByPortfolioResponseDataToJson(value: CapitalGainByPortfolioResponseData): any {
@@ -350,7 +352,8 @@ export class Convert {
   }
 
   public static toPurpleBigNumbers(json: any): PurpleBigNumbers {
-    return cast(json, r("PurpleBigNumbers"));
+    return json as PurpleBigNumbers
+    // return cast(json, r("PurpleBigNumbers"));
   }
 
   public static purpleBigNumbersToJson(value: PurpleBigNumbers): any {
@@ -358,7 +361,8 @@ export class Convert {
   }
 
   public static toCapitalGainByProductInTheMonth(json: any): CapitalGainByProductInTheMonth {
-    return cast(json, r("CapitalGainByProductInTheMonth"));
+    return json as CapitalGainByProductInTheMonth
+    // return cast(json, r("CapitalGainByProductInTheMonth"));
   }
 
   public static capitalGainByProductInTheMonthToJson(value: CapitalGainByProductInTheMonth): any {
@@ -366,7 +370,8 @@ export class Convert {
   }
 
   public static toPortfolioCommandPortfolioGetPortfoliosResponse(json: any): PortfolioCommandPortfolioGetPortfoliosResponse {
-    return cast(json, r("PortfolioCommandPortfolioGetPortfoliosResponse"));
+    return json as PortfolioCommandPortfolioGetPortfoliosResponse
+    // return cast(json, r("PortfolioCommandPortfolioGetPortfoliosResponse"));
   }
 
   public static portfolioCommandPortfolioGetPortfoliosResponseToJson(value: PortfolioCommandPortfolioGetPortfoliosResponse): any {
@@ -374,7 +379,8 @@ export class Convert {
   }
 
   public static toPortfolioCommandPortfolioGetPortfoliosResponseDatum(json: any): PortfolioCommandPortfolioGetPortfoliosResponseDatum {
-    return cast(json, r("PortfolioCommandPortfolioGetPortfoliosResponseDatum"));
+    return json as PortfolioCommandPortfolioGetPortfoliosResponseDatum
+    // return cast(json, r("PortfolioCommandPortfolioGetPortfoliosResponseDatum"));
   }
 
   public static portfolioCommandPortfolioGetPortfoliosResponseDatumToJson(value: PortfolioCommandPortfolioGetPortfoliosResponseDatum): any {
@@ -382,7 +388,8 @@ export class Convert {
   }
 
   public static toPortfolioConsolidateRequest(json: any): PortfolioConsolidateRequest {
-    return cast(json, r("PortfolioConsolidateRequest"));
+    return json as PortfolioConsolidateRequest
+    // return cast(json, r("PortfolioConsolidateRequest"));
   }
 
   public static portfolioConsolidateRequestToJson(value: PortfolioConsolidateRequest): any {
@@ -390,7 +397,8 @@ export class Convert {
   }
 
   public static toPortfolioConsolidateResponse(json: any): PortfolioConsolidateResponse {
-    return cast(json, r("PortfolioConsolidateResponse"));
+    return json as PortfolioConsolidateResponse
+    // return cast(json, r("PortfolioConsolidateResponse"));
   }
 
   public static portfolioConsolidateResponseToJson(value: PortfolioConsolidateResponse): any {
@@ -398,7 +406,8 @@ export class Convert {
   }
 
   public static toPortfolioConsolidateResponseData(json: any): PortfolioConsolidateResponseData {
-    return cast(json, r("PortfolioConsolidateResponseData"));
+    return json as PortfolioConsolidateResponseData
+    // return cast(json, r("PortfolioConsolidateResponseData"));
   }
 
   public static portfolioConsolidateResponseDataToJson(value: PortfolioConsolidateResponseData): any {
@@ -406,7 +415,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponse(json: any): PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponse {
-    return cast(json, r("PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponse"));
+    return json as PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponse
+    // return cast(json, r("PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponse"));
   }
 
   public static portfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponseToJson(value: PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponse): any {
@@ -414,7 +424,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponseData(json: any): PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponseData {
-    return cast(json, r("PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponseData"));
+    return json as PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponseData
+    // return cast(json, r("PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponseData"));
   }
 
   public static portfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponseDataToJson(value: PortfolioQueryPortfolioAnalysisGetPeriodicPortfolioProfitabilityResponseData): any {
@@ -422,7 +433,8 @@ export class Convert {
   }
 
   public static toAnnualProfitabilityToChart(json: any): AnnualProfitabilityToChart {
-    return cast(json, r("AnnualProfitabilityToChart"));
+    return json as AnnualProfitabilityToChart
+    // return cast(json, r("AnnualProfitabilityToChart"));
   }
 
   public static annualProfitabilityToChartToJson(value: AnnualProfitabilityToChart): any {
@@ -430,7 +442,8 @@ export class Convert {
   }
 
   public static toSeries(json: any): Series {
-    return cast(json, r("Series"));
+    return json as Series
+    // return cast(json, r("Series"));
   }
 
   public static seriesToJson(value: Series): any {
@@ -438,7 +451,8 @@ export class Convert {
   }
 
   public static toLyProfitabilityToChart(json: any): LyProfitabilityToChart {
-    return cast(json, r("LyProfitabilityToChart"));
+    return json as LyProfitabilityToChart
+    // return cast(json, r("LyProfitabilityToChart"));
   }
 
   public static lyProfitabilityToChartToJson(value: LyProfitabilityToChart): any {
@@ -446,7 +460,8 @@ export class Convert {
   }
 
   public static toRealRateOfReturn(json: any): RealRateOfReturn {
-    return cast(json, r("RealRateOfReturn"));
+    return json as RealRateOfReturn
+    // return cast(json, r("RealRateOfReturn"));
   }
 
   public static realRateOfReturnToJson(value: RealRateOfReturn): any {
@@ -454,7 +469,8 @@ export class Convert {
   }
 
   public static toSummaryByDateRange(json: any): SummaryByDateRange {
-    return cast(json, r("SummaryByDateRange"));
+    return json as SummaryByDateRange
+    // return cast(json, r("SummaryByDateRange"));
   }
 
   public static summaryByDateRangeToJson(value: SummaryByDateRange): any {
@@ -462,7 +478,8 @@ export class Convert {
   }
 
   public static toFromBegin(json: any): FromBegin {
-    return cast(json, r("FromBegin"));
+    return json as FromBegin
+    // return cast(json, r("FromBegin"));
   }
 
   public static fromBeginToJson(value: FromBegin): any {
@@ -470,7 +487,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryPortfolioConsolidationGetPortfolioResponse(json: any): PortfolioQueryPortfolioConsolidationGetPortfolioResponse {
-    return cast(json, r("PortfolioQueryPortfolioConsolidationGetPortfolioResponse"));
+    return json as PortfolioQueryPortfolioConsolidationGetPortfolioResponse
+    // return cast(json, r("PortfolioQueryPortfolioConsolidationGetPortfolioResponse"));
   }
 
   public static portfolioQueryPortfolioConsolidationGetPortfolioResponseToJson(value: PortfolioQueryPortfolioConsolidationGetPortfolioResponse): any {
@@ -478,7 +496,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryPortfolioConsolidationGetPortfolioResponseData(json: any): PortfolioQueryPortfolioConsolidationGetPortfolioResponseData {
-    return cast(json, r("PortfolioQueryPortfolioConsolidationGetPortfolioResponseData"));
+    return json as PortfolioQueryPortfolioConsolidationGetPortfolioResponseData
+    // return cast(json, r("PortfolioQueryPortfolioConsolidationGetPortfolioResponseData"));
   }
 
   public static portfolioQueryPortfolioConsolidationGetPortfolioResponseDataToJson(value: PortfolioQueryPortfolioConsolidationGetPortfolioResponseData): any {
@@ -486,7 +505,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryPortfolioStatisticsGetStatisticsByDateRequest(json: any): PortfolioQueryPortfolioStatisticsGetStatisticsByDateRequest {
-    return cast(json, r("PortfolioQueryPortfolioStatisticsGetStatisticsByDateRequest"));
+    return json as PortfolioQueryPortfolioStatisticsGetStatisticsByDateRequest
+    // return cast(json, r("PortfolioQueryPortfolioStatisticsGetStatisticsByDateRequest"));
   }
 
   public static portfolioQueryPortfolioStatisticsGetStatisticsByDateRequestToJson(value: PortfolioQueryPortfolioStatisticsGetStatisticsByDateRequest): any {
@@ -494,7 +514,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryPortfolioStatisticsGetStatisticsByDateResponse(json: any): PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponse {
-    return cast(json, r("PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponse"));
+    return json as PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponse
+    // return cast(json, r("PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponse"));
   }
 
   public static portfolioQueryPortfolioStatisticsGetStatisticsByDateResponseToJson(value: PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponse): any {
@@ -502,7 +523,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryPortfolioStatisticsGetStatisticsByDateResponseData(json: any): PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponseData {
-    return cast(json, r("PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponseData"));
+    return json as PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponseData
+    // return cast(json, r("PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponseData"));
   }
 
   public static portfolioQueryPortfolioStatisticsGetStatisticsByDateResponseDataToJson(value: PortfolioQueryPortfolioStatisticsGetStatisticsByDateResponseData): any {
@@ -510,7 +532,8 @@ export class Convert {
   }
 
   public static toFluffyBigNumbers(json: any): FluffyBigNumbers {
-    return cast(json, r("FluffyBigNumbers"));
+    return json as FluffyBigNumbers
+    // return cast(json, r("FluffyBigNumbers"));
   }
 
   public static fluffyBigNumbersToJson(value: FluffyBigNumbers): any {
@@ -518,7 +541,8 @@ export class Convert {
   }
 
   public static toPortfolioProfitability(json: any): PortfolioProfitability {
-    return cast(json, r("PortfolioProfitability"));
+    return json as PortfolioProfitability
+    // return cast(json, r("PortfolioProfitability"));
   }
 
   public static portfolioProfitabilityToJson(value: PortfolioProfitability): any {
@@ -526,7 +550,8 @@ export class Convert {
   }
 
   public static toDailyProfitability(json: any): DailyProfitability {
-    return cast(json, r("DailyProfitability"));
+    return json as DailyProfitability
+    // return cast(json, r("DailyProfitability"));
   }
 
   public static dailyProfitabilityToJson(value: DailyProfitability): any {
@@ -534,7 +559,8 @@ export class Convert {
   }
 
   public static toDailyProfitabilityCumulativeByFirstSery(json: any): DailyProfitabilityCumulativeByFirstSery {
-    return cast(json, r("DailyProfitabilityCumulativeByFirstSery"));
+    return json as DailyProfitabilityCumulativeByFirstSery
+    // return cast(json, r("DailyProfitabilityCumulativeByFirstSery"));
   }
 
   public static dailyProfitabilityCumulativeByFirstSeryToJson(value: DailyProfitabilityCumulativeByFirstSery): any {
@@ -542,7 +568,8 @@ export class Convert {
   }
 
   public static toProfitability(json: any): Profitability {
-    return cast(json, r("Profitability"));
+    return json as Profitability
+    // return cast(json, r("Profitability"));
   }
 
   public static profitabilityToJson(value: Profitability): any {
@@ -550,7 +577,8 @@ export class Convert {
   }
 
   public static toMonthlyProfitability(json: any): MonthlyProfitability {
-    return cast(json, r("MonthlyProfitability"));
+    return json as MonthlyProfitability
+    // return cast(json, r("MonthlyProfitability"));
   }
 
   public static monthlyProfitabilityToJson(value: MonthlyProfitability): any {
@@ -558,7 +586,8 @@ export class Convert {
   }
 
   public static toFromBeginningClass(json: any): FromBeginningClass {
-    return cast(json, r("FromBeginningClass"));
+    return json as FromBeginningClass
+    // return cast(json, r("FromBeginningClass"));
   }
 
   public static fromBeginningClassToJson(value: FromBeginningClass): any {
@@ -566,7 +595,8 @@ export class Convert {
   }
 
   public static toStatisticsSummaryMonthly(json: any): StatisticsSummaryMonthly {
-    return cast(json, r("StatisticsSummaryMonthly"));
+    return json as StatisticsSummaryMonthly
+    // return cast(json, r("StatisticsSummaryMonthly"));
   }
 
   public static statisticsSummaryMonthlyToJson(value: StatisticsSummaryMonthly): any {
@@ -574,7 +604,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest(json: any): PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest {
-    return cast(json, r("PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest"));
+    return json as PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest
+    // return cast(json, r("PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest"));
   }
 
   public static portfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequestToJson(value: PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeRequest): any {
@@ -582,7 +613,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponse(json: any): PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponse {
-    return cast(json, r("PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponse"));
+    return json as PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponse
+    // return cast(json, r("PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponse"));
   }
 
   public static portfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponseToJson(value: PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponse): any {
@@ -590,7 +622,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponseDatum(json: any): PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponseDatum {
-    return cast(json, r("PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponseDatum"));
+    return json as PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponseDatum
+    // return cast(json, r("PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponseDatum"));
   }
 
   public static portfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponseDatumToJson(value: PortfolioQueryProductAnalysisGetProductProftabilityByDateRangeResponseDatum): any {
@@ -598,7 +631,8 @@ export class Convert {
   }
 
   public static toFromBeginning(json: any): FromBeginning {
-    return cast(json, r("FromBeginning"));
+    return json as FromBeginning
+    // return cast(json, r("FromBeginning"));
   }
 
   public static fromBeginningToJson(value: FromBeginning): any {
@@ -606,7 +640,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryProductConsolidationGetProductsResponse(json: any): PortfolioQueryProductConsolidationGetProductsResponse {
-    return cast(json, r("PortfolioQueryProductConsolidationGetProductsResponse"));
+    return json as PortfolioQueryProductConsolidationGetProductsResponse
+    // return cast(json, r("PortfolioQueryProductConsolidationGetProductsResponse"));
   }
 
   public static portfolioQueryProductConsolidationGetProductsResponseToJson(value: PortfolioQueryProductConsolidationGetProductsResponse): any {
@@ -614,7 +649,8 @@ export class Convert {
   }
 
   public static toPortfolioQueryProductConsolidationGetProductsResponseDatum(json: any): PortfolioQueryProductConsolidationGetProductsResponseDatum {
-    return cast(json, r("PortfolioQueryProductConsolidationGetProductsResponseDatum"));
+    return json as PortfolioQueryProductConsolidationGetProductsResponseDatum
+    // return cast(json, r("PortfolioQueryProductConsolidationGetProductsResponseDatum"));
   }
 
   public static portfolioQueryProductConsolidationGetProductsResponseDatumToJson(value: PortfolioQueryProductConsolidationGetProductsResponseDatum): any {
